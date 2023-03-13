@@ -20,3 +20,27 @@ const Unimp = NativeModules.Unimp
 export function multiply(a: number, b: number): Promise<number> {
   return Unimp.multiply(a, b);
 }
+
+export declare interface Config {
+  // 胶囊按钮的标题和标识
+  items?: { title: string; key: string }[];
+  //是否显示胶囊按钮
+  capsule?: boolean;
+  //安卓独有，胶囊按钮字体大小
+  fontSize?: string;
+  //安卓独有，胶囊按钮字体颜色
+  fontColor?: string;
+  //安卓独有，胶囊按钮字体宽度
+  fontWeight?: string;
+}
+
+export function initialize(params: Config = {}): Promise<boolean> {
+  return Unimp.initialize({
+    items: [],
+    capsule: true,
+    fontSize: '16px',
+    fontColor: '#000',
+    fontWeight: 'normal',
+    ...params,
+  });
+}
