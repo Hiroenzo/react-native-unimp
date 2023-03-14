@@ -17,16 +17,14 @@ import com.facebook.react.module.annotations.ReactModule;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
-import io.dcloud.common.DHInterface.ICallBack;
 import io.dcloud.feature.sdk.DCSDKInitConfig;
 import io.dcloud.feature.sdk.DCUniMPSDK;
-import io.dcloud.feature.sdk.Interface.IDCUniMPAppSplashView;
 import io.dcloud.feature.sdk.Interface.IDCUniMPPreInitCallback;
 import io.dcloud.feature.sdk.Interface.IUniMP;
 import io.dcloud.feature.sdk.MenuActionSheetItem;
+import io.dcloud.feature.unimp.config.IUniMPReleaseCallBack;
+import io.dcloud.feature.unimp.config.UniMPOpenConfiguration;
+import io.dcloud.feature.unimp.config.UniMPReleaseConfiguration;
 
 @ReactModule(name = UnimpModule.NAME)
 public class UnimpModule extends ReactContextBaseJavaModule {
@@ -62,7 +60,7 @@ public class UnimpModule extends ReactContextBaseJavaModule {
     List<MenuActionSheetItem> sheetItems = new ArrayList<>();
     sheetItems.add(item);
     DCSDKInitConfig config = new DCSDKInitConfig.Builder()
-    	.setCapsule(true)
+    	.setCapsule(false)
     	.setMenuDefFontSize("16px")
     	.setMenuDefFontColor("#ff00ff")
     	.setMenuDefFontWeight("normal")
@@ -108,18 +106,30 @@ public class UnimpModule extends ReactContextBaseJavaModule {
    * 将wgt包中的资源文件释放到uni小程序运行时路径下
    * @param appid    uni小程序的id
    * @param wgtPath  uni小程序应用资源包路径 仅支持SD路径 不支持assets
+   * @param password 资源包解压密码（猜的）
    */
   @ReactMethod
-  public void releaseWgtToRunPathFromPath(String appid, String wgtPath, final Promise promise) {
-    DCUniMPSDK.getInstance().releaseWgtToRunPathFromePath(appid, wgtPath, new ICallBack() {
+  public void releaseWgtToRunPath(String appid, String wgtPath, String password, final Promise promise) {
+    UniMPReleaseConfiguration uniMPReleaseConfiguration = new UniMPReleaseConfiguration();
+    uniMPReleaseConfiguration.wgtPath = wgtPath;
+    uniMPReleaseConfiguration.password = password;
+
+    // ReactApplicationContext context = this.context;
+
+    DCUniMPSDK.getInstance().releaseWgtToRunPath(appid, uniMPReleaseConfiguration, new IUniMPReleaseCallBack() {
       @Override
-      public Object onCallBack(int code, Object pArgs) {
-        if (code == 1) {
-          // 释放wgt完成
-        } else{
-          // 释放wgt失败
+      public void onCallBack(int code, Object pArgs) {
+        Log.e("unimp","code ---  " + code + "  pArgs --" + pArgs);
+        try {
+          if (code == 1) {
+            // DCUniMPSDK.getInstance().openUniMP(context, appid);
+            promise.resolve(code);
+          } else {
+            throw new Exception((String) pArgs);
+          }
+        } catch (Exception e) {
+          promise.reject(e);
         }
-        return null;
       }
     });
   }
@@ -146,7 +156,9 @@ public class UnimpModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void openUniMP(String appid, final Promise promise) {
     try {
-      IUniMP unimp = DCUniMPSDK.getInstance().openUniMP(this.context, appid);
+      UniMPOpenConfiguration uniMPOpenConfiguration = new UniMPOpenConfiguration();
+      uniMPOpenConfiguration.extraData.put("darkmode", "auto");
+      IUniMP unimp = DCUniMPSDK.getInstance().openUniMP(this.context, appid, uniMPOpenConfiguration);
       promise.resolve(unimp);
     } catch (Exception e) {
       e.printStackTrace();

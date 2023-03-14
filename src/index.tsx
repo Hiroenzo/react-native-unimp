@@ -57,6 +57,20 @@ export function getAppBasePath(): Promise<string> {
 }
 
 /**
+ * 将wgt包中的资源文件释放到uni小程序运行时路径下
+ * @param appid    uni小程序的id
+ * @param wgtPath  uni小程序应用资源包路径 仅支持SD路径 不支持assets
+ * @param password 资源包解压密码（猜的）
+ */
+export function releaseWgtToRunPath(
+  appid: string,
+  wgtPath: string,
+  password?: string
+): Promise<any> {
+  return Unimp.releaseWgtToRunPath(appid, wgtPath, password);
+}
+
+/**
  * 检查当前appid小程序是否已释放wgt资源
  * 可用来检查当前appid资源是否存在
  * @param appid 小程序appid
