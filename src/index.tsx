@@ -21,7 +21,7 @@ export function multiply(a: number, b: number): Promise<number> {
   return Unimp.multiply(a, b);
 }
 
-export declare interface Config {
+export declare interface InitializeProps {
   // 胶囊按钮的标题和标识
   items?: { title: string; key: string }[];
   //是否显示胶囊按钮
@@ -34,13 +34,41 @@ export declare interface Config {
   fontWeight?: string;
 }
 
-export function initialize(params: Config = {}): Promise<boolean> {
-  return Unimp.initialize({
-    items: [],
-    capsule: true,
-    fontSize: '16px',
-    fontColor: '#000',
-    fontWeight: 'normal',
-    ...params,
-  });
+/**
+ * 初始化小程序SDK
+ * @param params 初始化参数
+ */
+export function initialize(params: InitializeProps = {}): Promise<boolean> {
+  return Unimp.initialize(params);
+}
+
+/**
+ * 校验小程序SDK是否已初始化
+ */
+export function isInitialize(): Promise<boolean> {
+  return Unimp.isInitialize();
+}
+
+/**
+ * 获取小程序运行路径
+ */
+export function getAppBasePath(): Promise<string> {
+  return Unimp.getAppBasePath();
+}
+
+/**
+ * 检查当前appid小程序是否已释放wgt资源
+ * 可用来检查当前appid资源是否存在
+ * @param appid 小程序appid
+ */
+export function isExistsApp(appid: string): Promise<boolean> {
+  return Unimp.isExistsApp(appid);
+}
+
+/**
+ * 启动小程序
+ * @param appid uni小程序应用id
+ */
+export function openUniMP(appid: string): Promise<any> {
+  return Unimp.openUniMP(appid);
 }
