@@ -17,10 +17,6 @@ const Unimp = NativeModules.Unimp
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return Unimp.multiply(a, b);
-}
-
 export declare interface InitializeProps {
   // 胶囊按钮的标题和标识
   items?: { title: string; key: string }[];

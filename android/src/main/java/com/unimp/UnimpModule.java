@@ -43,11 +43,11 @@ public class UnimpModule extends ReactContextBaseJavaModule {
     return NAME;
   }
 
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
-  @ReactMethod
-  public void multiply(double a, double b, Promise promise) {
-    promise.resolve(a * b);
+  /**
+   * 传递监听事件
+   * @param eventName 事件
+   * @param params    参数
+   */
   }
 
   /**
