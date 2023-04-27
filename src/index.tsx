@@ -95,3 +95,50 @@ export function isExistsApp(appid: string): Promise<boolean> {
 export function openUniMP(appid: string): Promise<any> {
   return Unimp.openUniMP(appid);
 }
+
+/**
+ * 获取uni小程序版本信息
+ * @param appid uni小程序应用id
+ */
+export function getAppVersionInfo(appid: string): Promise<any> {
+  return Unimp.getAppVersionInfo(appid);
+}
+
+export declare interface IMenuClickCallBackProps {
+  // uni小程序应用id
+  appid: string;
+  // 小程序菜单按钮id
+  buttonid: string;
+}
+
+/**
+ * 小程序菜单点击事件回调
+ * @param callback 回调方法
+ */
+export function setDefMenuButtonClickCallBack(
+  callback: (arg: IMenuClickCallBackProps) => any
+) {
+  Unimp.setDefMenuButtonClickCallBack((params: IMenuClickCallBackProps) =>
+    callback?.(params)
+  );
+}
+
+/**
+ * 监听小程序被关闭事件
+ * @param callback 回调方法
+ */
+export function setUniMPOnCloseCallBack(callback: (appid: string) => any) {
+  Unimp.setUniMPOnCloseCallBack((appid: string) => callback?.(appid));
+}
+
+/**
+ * 小程序胶囊按钮点击关闭事件
+ * @param callback 回调方法
+ */
+export function setCapsuleCloseButtonClickCallBack(
+  callback: (appid: string) => any
+) {
+  Unimp.setCapsuleCloseButtonClickCallBack((appid: string) =>
+    callback?.(appid)
+  );
+}

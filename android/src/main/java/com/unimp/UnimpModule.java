@@ -3,6 +3,7 @@ package com.unimp;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -11,8 +12,13 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableNativeMap;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +26,11 @@ import java.util.List;
 import io.dcloud.feature.sdk.DCSDKInitConfig;
 import io.dcloud.feature.sdk.DCUniMPCapsuleButtonStyle;
 import io.dcloud.feature.sdk.DCUniMPSDK;
+import io.dcloud.feature.sdk.Interface.IDCUniMPOnCapsuleCloseButtontCallBack;
 import io.dcloud.feature.sdk.Interface.IDCUniMPPreInitCallback;
+import io.dcloud.feature.sdk.Interface.IMenuButtonClickCallBack;
 import io.dcloud.feature.sdk.Interface.IUniMP;
+import io.dcloud.feature.sdk.Interface.IUniMPOnCloseCallBack;
 import io.dcloud.feature.sdk.MenuActionSheetItem;
 import io.dcloud.feature.unimp.config.IUniMPReleaseCallBack;
 import io.dcloud.feature.unimp.config.UniMPOpenConfiguration;
@@ -49,6 +58,8 @@ public class UnimpModule extends ReactContextBaseJavaModule {
    * @param eventName 事件
    * @param params    参数
    */
+  private void sendEvent(String eventName, @Nullable WritableMap params) {
+    reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
   }
 
   /**
@@ -154,7 +165,7 @@ public class UnimpModule extends ReactContextBaseJavaModule {
 
   /**
    * 启动小程序
-   * @param appid   uni小程序应用id
+   * @param appid uni小程序应用id
    */
   @ReactMethod
   public void openUniMP(String appid, final Promise promise) {
@@ -167,5 +178,71 @@ public class UnimpModule extends ReactContextBaseJavaModule {
       e.printStackTrace();
       promise.reject(e);
     }
+  }
+
+  /**
+   * 获取uni小程序版本信息
+   * @param appid 小程序appid
+   */
+  @ReactMethod
+  public void getAppVersionInfo(String appid, final Promise promise) {
+    try {
+      JSONObject jsonObject = DCUniMPSDK.getInstance().getAppVersionInfo(appid);
+      if (jsonObject != null) {
+        promise.resolve(jsonObject.toString());
+      } else {
+        promise.resolve(null);
+      }
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+  }
+
+  /**
+   * 小程序菜单点击事件回调
+   * @param callback 回调事件
+   */
+  @ReactMethod
+  public void setDefMenuButtonClickCallBack(final Callback callback) {
+    DCUniMPSDK.getInstance().setDefMenuButtonClickCallBack(new IMenuButtonClickCallBack() {
+      @Override
+      public void onClick(String appid, String buttonid) {
+        Log.e("unimp", "点击了"+appid+"的"+buttonid);
+        WritableMap params = new WritableNativeMap();
+        params.putString("appid", appid);
+        params.putString("buttonid", buttonid);
+        callback.invoke(params);
+      }
+    });
+  }
+
+  /**
+   * 监听小程序被关闭事件
+   * @param callback 回调事件
+   */
+  @ReactMethod
+  public void setUniMPOnCloseCallBack(final Callback callback) {
+    DCUniMPSDK.getInstance().setUniMPOnCloseCallBack(new IUniMPOnCloseCallBack() {
+      @Override
+      public void onClose(String appid) {
+        Log.e("unimp", appid+"被关闭了");
+        callback.invoke(appid);
+      }
+    });
+  }
+
+  /**
+   * 小程序胶囊按钮点击关闭事件
+   * @param callback 回调事件
+   */
+  @ReactMethod
+  public void setCapsuleCloseButtonClickCallBack(final Callback callback) {
+    DCUniMPSDK.getInstance().setCapsuleCloseButtonClickCallBack(new IDCUniMPOnCapsuleCloseButtontCallBack() {
+      @Override
+      public void closeButtonClicked(String appid) {
+        Log.e("unimp", appid+"胶囊点击了关闭按钮");
+        callback.invoke(appid);
+      }
+    });
   }
 }
