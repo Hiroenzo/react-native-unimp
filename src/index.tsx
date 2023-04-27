@@ -20,22 +20,35 @@ const Unimp = NativeModules.Unimp
 export declare interface InitializeProps {
   // 胶囊按钮的标题和标识
   items?: { title: string; key: string }[];
-  //是否显示胶囊按钮
-  capsule?: boolean;
-  //安卓独有，胶囊按钮字体大小
-  fontSize?: string;
-  //安卓独有，胶囊按钮字体颜色
-  fontColor?: string;
-  //安卓独有，胶囊按钮字体宽度
-  fontWeight?: string;
+  // 是否显示胶囊按钮
+  capsule: boolean;
+  // 胶囊按钮字体大小
+  fontSize: string;
+  // 胶囊按钮字体颜色
+  fontColor: string;
+  // 胶囊按钮字体宽度
+  fontWeight: string;
+  // 设置小程序退出时是否进入后台
+  isEnableBackground: boolean;
+}
+
+export declare interface ICapsuleBtnStyleProps {
+  backgroundColor?: string;
+  textColor?: string;
+  highlightColor?: string;
+  borderColor?: string;
 }
 
 /**
  * 初始化小程序SDK
- * @param params 初始化参数
+ * @param params          初始化参数
+ * @param capsuleBtnStyle 胶囊按钮样式
  */
-export function initialize(params: InitializeProps = {}): Promise<boolean> {
-  return Unimp.initialize(params);
+export function initialize(
+  params: InitializeProps,
+  capsuleBtnStyle: ICapsuleBtnStyleProps = {}
+): Promise<boolean> {
+  return Unimp.initialize(params, capsuleBtnStyle);
 }
 
 /**

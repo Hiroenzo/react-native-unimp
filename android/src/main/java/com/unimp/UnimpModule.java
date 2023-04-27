@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.dcloud.feature.sdk.DCSDKInitConfig;
+import io.dcloud.feature.sdk.DCUniMPCapsuleButtonStyle;
 import io.dcloud.feature.sdk.DCUniMPSDK;
 import io.dcloud.feature.sdk.Interface.IDCUniMPPreInitCallback;
 import io.dcloud.feature.sdk.Interface.IUniMP;
@@ -52,18 +53,20 @@ public class UnimpModule extends ReactContextBaseJavaModule {
 
   /**
    * 初始化小程序
-   * @param params  小程序菜单参数
+   * @param params 小程序菜单参数
    */
   @ReactMethod
-  public void initialize(ReadableMap params, final Promise promise) {
+  public void initialize(ReadableMap params, DCUniMPCapsuleButtonStyle btnStyle, final Promise promise) {
     MenuActionSheetItem item = new MenuActionSheetItem("关于", "gy");
     List<MenuActionSheetItem> sheetItems = new ArrayList<>();
     sheetItems.add(item);
     DCSDKInitConfig config = new DCSDKInitConfig.Builder()
-    	.setCapsule(false)
-    	.setMenuDefFontSize("16px")
-    	.setMenuDefFontColor("#ff00ff")
-    	.setMenuDefFontWeight("normal")
+    	.setCapsule(params.getBoolean("capsule"))
+      .setCapsuleButtonStyle(btnStyle)
+    	.setMenuDefFontSize(params.getString("fontSize"))
+    	.setMenuDefFontColor(params.getString("fontColor"))
+    	.setMenuDefFontWeight(params.getString("fontWeight"))
+      .setEnableBackground(params.getBoolean("isEnableBackground"))
     	.setMenuActionSheetItems(sheetItems)
     	.build();
     DCUniMPSDK.getInstance().initialize(this.context, config, new IDCUniMPPreInitCallback() {
