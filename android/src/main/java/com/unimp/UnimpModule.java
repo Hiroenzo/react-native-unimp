@@ -64,7 +64,8 @@ public class UnimpModule extends ReactContextBaseJavaModule {
 
   /**
    * 初始化小程序
-   * @param params 小程序菜单参数
+   * @param params   小程序胶囊按钮参数
+   * @param btnStyle 胶囊样式
    */
   @ReactMethod
   public void initialize(ReadableMap params, DCUniMPCapsuleButtonStyle btnStyle, final Promise promise) {
@@ -165,14 +166,13 @@ public class UnimpModule extends ReactContextBaseJavaModule {
 
   /**
    * 启动小程序
-   * @param appid uni小程序应用id
+   * @param appid         uni小程序应用id
+   * @param configuration uni小程序应用配置
    */
   @ReactMethod
-  public void openUniMP(String appid, final Promise promise) {
+  public void openUniMP(String appid, UniMPOpenConfiguration configuration, final Promise promise) {
     try {
-      UniMPOpenConfiguration uniMPOpenConfiguration = new UniMPOpenConfiguration();
-      uniMPOpenConfiguration.extraData.put("darkmode", "auto");
-      IUniMP unimp = DCUniMPSDK.getInstance().openUniMP(this.context, appid, uniMPOpenConfiguration);
+      IUniMP unimp = DCUniMPSDK.getInstance().openUniMP(this.context, appid, configuration);
       promise.resolve(unimp);
     } catch (Exception e) {
       e.printStackTrace();

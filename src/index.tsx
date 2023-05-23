@@ -17,6 +17,9 @@ const Unimp = NativeModules.Unimp
       }
     );
 
+/**
+ * 小程序初始化参数
+ */
 export declare interface InitializeProps {
   // 胶囊按钮的标题和标识
   items?: { title: string; key: string }[];
@@ -32,10 +35,17 @@ export declare interface InitializeProps {
   isEnableBackground: boolean;
 }
 
+/**
+ * 胶囊按钮样式
+ */
 export declare interface ICapsuleBtnStyleProps {
+  // 背景颜色
   backgroundColor?: string;
+  // 字体颜色
   textColor?: string;
+  // 高亮颜色
   highlightColor?: string;
+  // 边框颜色
   borderColor?: string;
 }
 
@@ -46,7 +56,7 @@ export declare interface ICapsuleBtnStyleProps {
  */
 export function initialize(
   params: InitializeProps,
-  capsuleBtnStyle: ICapsuleBtnStyleProps = {}
+  capsuleBtnStyle?: ICapsuleBtnStyleProps
 ): Promise<boolean> {
   return Unimp.initialize(params, capsuleBtnStyle);
 }
@@ -55,7 +65,11 @@ export function initialize(
  * 校验小程序SDK是否已初始化
  */
 export function isInitialize(): Promise<boolean> {
-  return Unimp.isInitialize();
+  // 只支持Android
+  if (Platform.OS === 'android') {
+    return Unimp.isInitialize();
+  }
+  return Promise.resolve(true);
 }
 
 /**
@@ -89,11 +103,23 @@ export function isExistsApp(appid: string): Promise<boolean> {
 }
 
 /**
- * 启动小程序
- * @param appid uni小程序应用id
+ * 开启小程序时传入的配置参数
  */
-export function openUniMP(appid: string): Promise<any> {
-  return Unimp.openUniMP(appid);
+export declare interface IConfigurationProps {
+  // 是否支持暗色模式
+  darkMode?: 'auto' | string;
+}
+
+/**
+ * 启动小程序
+ * @param appid         uni小程序应用id
+ * @param configuration uni小程序应用配置
+ */
+export function openUniMP(
+  appid: string,
+  configuration?: IConfigurationProps
+): Promise<any> {
+  return Unimp.openUniMP(appid, configuration);
 }
 
 /**
@@ -104,6 +130,9 @@ export function getAppVersionInfo(appid: string): Promise<any> {
   return Unimp.getAppVersionInfo(appid);
 }
 
+/**
+ * 小程序胶囊按钮点击回调参数
+ */
 export declare interface IMenuClickCallBackProps {
   // uni小程序应用id
   appid: string;
