@@ -1,12 +1,8 @@
-
-#ifdef RCT_NEW_ARCH_ENABLED
-#import "RNUnimpSpec.h"
-
-@interface Unimp : NSObject <NativeUnimpSpec>
-#else
 #import <React/RCTBridgeModule.h>
+#import "RCUniMP.h"
+#import <React/RCTEventEmitter.h>
+#import <React/RCTBridgeDelegate.h>
 
-@interface Unimp : NSObject <RCTBridgeModule>
-#endif
+@interface Unimp : RCTEventEmitter <RCTBridgeModule,DCUniMPSDKEngineDelegate,RCTBridgeDelegate>
 
 @end
