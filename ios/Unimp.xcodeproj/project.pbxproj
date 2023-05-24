@@ -7,17 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		092E740629FB664C004F104A /* liblibNativeObj.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E73FB29FB664B004F104A /* liblibNativeObj.a */; };
-		092E740729FB664C004F104A /* liblibStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E73FC29FB664C004F104A /* liblibStorage.a */; };
-		092E740829FB664C004F104A /* libSDWebImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E73FD29FB664C004F104A /* libSDWebImage.a */; };
-		092E740929FB664C004F104A /* storage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E73FE29FB664C004F104A /* storage.framework */; };
-		092E740A29FB664C004F104A /* liblibPDRCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E73FF29FB664C004F104A /* liblibPDRCore.a */; };
-		092E740B29FB664C004F104A /* liblibUI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E740029FB664C004F104A /* liblibUI.a */; };
-		092E740C29FB664C004F104A /* liblibNativeUI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E740129FB664C004F104A /* liblibNativeUI.a */; };
-		092E740D29FB664C004F104A /* liblibWeex.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E740229FB664C004F104A /* liblibWeex.a */; };
-		092E740E29FB664C004F104A /* libcoreSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E740329FB664C004F104A /* libcoreSupport.a */; };
-		092E740F29FB664C004F104A /* liblibNavigator.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E740429FB664C004F104A /* liblibNavigator.a */; };
-		092E741029FB664C004F104A /* liblibIO.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E740529FB664C004F104A /* liblibIO.a */; };
+		0924E60B2A1DA4C0001CB497 /* storage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6002A1DA4BF001CB497 /* storage.framework */; };
+		0924E60C2A1DA4C0001CB497 /* liblibNativeUI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6012A1DA4BF001CB497 /* liblibNativeUI.a */; };
+		0924E60D2A1DA4C0001CB497 /* liblibStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6022A1DA4BF001CB497 /* liblibStorage.a */; };
+		0924E60E2A1DA4C0001CB497 /* liblibPDRCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6032A1DA4BF001CB497 /* liblibPDRCore.a */; };
+		0924E60F2A1DA4C0001CB497 /* liblibNativeObj.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6042A1DA4BF001CB497 /* liblibNativeObj.a */; };
+		0924E6102A1DA4C0001CB497 /* liblibIO.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6052A1DA4BF001CB497 /* liblibIO.a */; };
+		0924E6112A1DA4C0001CB497 /* liblibWeex.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6062A1DA4BF001CB497 /* liblibWeex.a */; };
+		0924E6122A1DA4C0001CB497 /* libcoreSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6072A1DA4BF001CB497 /* libcoreSupport.a */; };
+		0924E6132A1DA4C0001CB497 /* liblibUI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6082A1DA4BF001CB497 /* liblibUI.a */; };
+		0924E6142A1DA4C0001CB497 /* liblibNavigator.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E6092A1DA4C0001CB497 /* liblibNavigator.a */; };
+		0924E6152A1DA4C0001CB497 /* libSDWebImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0924E60A2A1DA4C0001CB497 /* libSDWebImage.a */; };
 		092E741229FB6667004F104A /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E741129FB6667004F104A /* JavaScriptCore.framework */; };
 		092E741429FB667E004F104A /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E741329FB667E004F104A /* CoreMedia.framework */; };
 		092E741629FB6685004F104A /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 092E741529FB6685004F104A /* MediaPlayer.framework */; };
@@ -47,17 +47,17 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		092E73FB29FB664B004F104A /* liblibNativeObj.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibNativeObj.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/liblibNativeObj.a"; sourceTree = "<group>"; };
-		092E73FC29FB664C004F104A /* liblibStorage.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibStorage.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/liblibStorage.a"; sourceTree = "<group>"; };
-		092E73FD29FB664C004F104A /* libSDWebImage.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDWebImage.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/libSDWebImage.a"; sourceTree = "<group>"; };
-		092E73FE29FB664C004F104A /* storage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = storage.framework; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/storage.framework"; sourceTree = "<group>"; };
-		092E73FF29FB664C004F104A /* liblibPDRCore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibPDRCore.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/liblibPDRCore.a"; sourceTree = "<group>"; };
-		092E740029FB664C004F104A /* liblibUI.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibUI.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/liblibUI.a"; sourceTree = "<group>"; };
-		092E740129FB664C004F104A /* liblibNativeUI.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibNativeUI.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/liblibNativeUI.a"; sourceTree = "<group>"; };
-		092E740229FB664C004F104A /* liblibWeex.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibWeex.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/liblibWeex.a"; sourceTree = "<group>"; };
-		092E740329FB664C004F104A /* libcoreSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcoreSupport.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/libcoreSupport.a"; sourceTree = "<group>"; };
-		092E740429FB664C004F104A /* liblibNavigator.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibNavigator.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/liblibNavigator.a"; sourceTree = "<group>"; };
-		092E740529FB664C004F104A /* liblibIO.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibIO.a; path = "../../../../../../Downloads/unimp/UniMPSDK_iOS@3.7.9/UniMPSDK/Core/Libs/liblibIO.a"; sourceTree = "<group>"; };
+		0924E6002A1DA4BF001CB497 /* storage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = storage.framework; path = Libs/storage.framework; sourceTree = "<group>"; };
+		0924E6012A1DA4BF001CB497 /* liblibNativeUI.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibNativeUI.a; path = Libs/liblibNativeUI.a; sourceTree = "<group>"; };
+		0924E6022A1DA4BF001CB497 /* liblibStorage.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibStorage.a; path = Libs/liblibStorage.a; sourceTree = "<group>"; };
+		0924E6032A1DA4BF001CB497 /* liblibPDRCore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibPDRCore.a; path = Libs/liblibPDRCore.a; sourceTree = "<group>"; };
+		0924E6042A1DA4BF001CB497 /* liblibNativeObj.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibNativeObj.a; path = Libs/liblibNativeObj.a; sourceTree = "<group>"; };
+		0924E6052A1DA4BF001CB497 /* liblibIO.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibIO.a; path = Libs/liblibIO.a; sourceTree = "<group>"; };
+		0924E6062A1DA4BF001CB497 /* liblibWeex.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibWeex.a; path = Libs/liblibWeex.a; sourceTree = "<group>"; };
+		0924E6072A1DA4BF001CB497 /* libcoreSupport.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcoreSupport.a; path = Libs/libcoreSupport.a; sourceTree = "<group>"; };
+		0924E6082A1DA4BF001CB497 /* liblibUI.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibUI.a; path = Libs/liblibUI.a; sourceTree = "<group>"; };
+		0924E6092A1DA4C0001CB497 /* liblibNavigator.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liblibNavigator.a; path = Libs/liblibNavigator.a; sourceTree = "<group>"; };
+		0924E60A2A1DA4C0001CB497 /* libSDWebImage.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDWebImage.a; path = Libs/libSDWebImage.a; sourceTree = "<group>"; };
 		092E741129FB6667004F104A /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk/System/iOSSupport/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
 		092E741329FB667E004F104A /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk/System/Library/Frameworks/CoreMedia.framework; sourceTree = DEVELOPER_DIR; };
 		092E741529FB6685004F104A /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk/System/iOSSupport/System/Library/Frameworks/MediaPlayer.framework; sourceTree = DEVELOPER_DIR; };
@@ -163,6 +163,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0924E60B2A1DA4C0001CB497 /* storage.framework in Frameworks */,
+				0924E60C2A1DA4C0001CB497 /* liblibNativeUI.a in Frameworks */,
+				0924E60D2A1DA4C0001CB497 /* liblibStorage.a in Frameworks */,
+				0924E60E2A1DA4C0001CB497 /* liblibPDRCore.a in Frameworks */,
+				0924E60F2A1DA4C0001CB497 /* liblibNativeObj.a in Frameworks */,
+				0924E6102A1DA4C0001CB497 /* liblibIO.a in Frameworks */,
+				0924E6112A1DA4C0001CB497 /* liblibWeex.a in Frameworks */,
+				0924E6122A1DA4C0001CB497 /* libcoreSupport.a in Frameworks */,
+				0924E6132A1DA4C0001CB497 /* liblibUI.a in Frameworks */,
+				0924E6142A1DA4C0001CB497 /* liblibNavigator.a in Frameworks */,
+				0924E6152A1DA4C0001CB497 /* libSDWebImage.a in Frameworks */,
 				092E742C29FB6799004F104A /* libiconv.tbd in Frameworks */,
 				092E742A29FB678D004F104A /* CoreTelephony.framework in Frameworks */,
 				092E742829FB6784004F104A /* QuickLook.framework in Frameworks */,
@@ -177,17 +188,6 @@
 				092E741629FB6685004F104A /* MediaPlayer.framework in Frameworks */,
 				092E741429FB667E004F104A /* CoreMedia.framework in Frameworks */,
 				092E741229FB6667004F104A /* JavaScriptCore.framework in Frameworks */,
-				092E740629FB664C004F104A /* liblibNativeObj.a in Frameworks */,
-				092E740729FB664C004F104A /* liblibStorage.a in Frameworks */,
-				092E740829FB664C004F104A /* libSDWebImage.a in Frameworks */,
-				092E740929FB664C004F104A /* storage.framework in Frameworks */,
-				092E740A29FB664C004F104A /* liblibPDRCore.a in Frameworks */,
-				092E740B29FB664C004F104A /* liblibUI.a in Frameworks */,
-				092E740C29FB664C004F104A /* liblibNativeUI.a in Frameworks */,
-				092E740D29FB664C004F104A /* liblibWeex.a in Frameworks */,
-				092E740E29FB664C004F104A /* libcoreSupport.a in Frameworks */,
-				092E740F29FB664C004F104A /* liblibNavigator.a in Frameworks */,
-				092E741029FB664C004F104A /* liblibIO.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -197,6 +197,17 @@
 		092E73FA29FB664B004F104A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0924E6072A1DA4BF001CB497 /* libcoreSupport.a */,
+				0924E6052A1DA4BF001CB497 /* liblibIO.a */,
+				0924E6042A1DA4BF001CB497 /* liblibNativeObj.a */,
+				0924E6012A1DA4BF001CB497 /* liblibNativeUI.a */,
+				0924E6092A1DA4C0001CB497 /* liblibNavigator.a */,
+				0924E6032A1DA4BF001CB497 /* liblibPDRCore.a */,
+				0924E6022A1DA4BF001CB497 /* liblibStorage.a */,
+				0924E6082A1DA4BF001CB497 /* liblibUI.a */,
+				0924E6062A1DA4BF001CB497 /* liblibWeex.a */,
+				0924E60A2A1DA4C0001CB497 /* libSDWebImage.a */,
+				0924E6002A1DA4BF001CB497 /* storage.framework */,
 				092E742B29FB6798004F104A /* libiconv.tbd */,
 				092E742929FB678D004F104A /* CoreTelephony.framework */,
 				092E742729FB6784004F104A /* QuickLook.framework */,
@@ -211,17 +222,6 @@
 				092E741529FB6685004F104A /* MediaPlayer.framework */,
 				092E741329FB667E004F104A /* CoreMedia.framework */,
 				092E741129FB6667004F104A /* JavaScriptCore.framework */,
-				092E740329FB664C004F104A /* libcoreSupport.a */,
-				092E740529FB664C004F104A /* liblibIO.a */,
-				092E73FB29FB664B004F104A /* liblibNativeObj.a */,
-				092E740129FB664C004F104A /* liblibNativeUI.a */,
-				092E740429FB664C004F104A /* liblibNavigator.a */,
-				092E73FF29FB664C004F104A /* liblibPDRCore.a */,
-				092E73FC29FB664C004F104A /* liblibStorage.a */,
-				092E740029FB664C004F104A /* liblibUI.a */,
-				092E740229FB664C004F104A /* liblibWeex.a */,
-				092E73FD29FB664C004F104A /* libSDWebImage.a */,
-				092E73FE29FB664C004F104A /* storage.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -510,13 +510,20 @@
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libs",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libs",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = Unimp;
 				SKIP_INSTALL = YES;
@@ -526,13 +533,20 @@
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libs",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",
 				);
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libs",
+				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = Unimp;
 				SKIP_INSTALL = YES;
