@@ -75,21 +75,23 @@ dependencies {
   implementation fileTree(include: ['*.jar'], dir: 'libs')
   implementation fileTree(include: ['*.aar'], dir: 'libs')
   //必须添加的依赖
-  implementation "androidx.recyclerview:recyclerview:1.0.0"
-  implementation "androidx.legacy:legacy-support-v4:1.0.0"
-  implementation "androidx.appcompat:appcompat:1.0.0"
-  implementation 'com.alibaba:fastjson:1.2.83'
+  implementation "androidx.recyclerview:recyclerview:1.0.0" // android 自带recyclerview支持
+  implementation "androidx.legacy:legacy-support-v4:1.0.0" // androidx support支持
+  implementation "androidx.appcompat:appcompat:1.0.0" // androidx appcompat支持
+  implementation 'com.alibaba:fastjson:1.2.83' // fastjson功能需要
+  // 图片加载需要
   implementation 'com.facebook.fresco:fresco:2.5.0'
   implementation 'com.facebook.fresco:animated-gif:2.5.0'
   implementation 'com.facebook.fresco:webpsupport:2.5.0'
   implementation 'com.facebook.fresco:animated-webp:2.5.0'
   implementation 'com.github.bumptech.glide:glide:4.9.0'
+
   implementation 'com.android.support:multidex:1.0.3'
 
   implementation 'com.squareup.okhttp3:okhttp:3.7.0'
   implementation 'com.squareup.okio:okio:1.8.0'
   // add since 2022-12-29
-  implementation 'androidx.webkit:webkit:1.3.0'
+  implementation 'androidx.webkit:webkit:1.3.0' //3.6.15版本之后，用来支持暗黑模式
 }
 
 if (isNewArchitectureEnabled()) {
