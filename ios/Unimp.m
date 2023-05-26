@@ -17,7 +17,7 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(initialize:(NSDictionary *)params CapsuleButtonStyle:(DCUniMPCapsuleButtonStyle *)btnStyle resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
-        NSArray *item = params[@"items"];
+        NSArray *items = params[@"items"];
         NSMutableArray *sheetItems = [NSMutableArray array];
         
         for (int i=0; i<items.count; i++) {
@@ -35,7 +35,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary *)params CapsuleButtonStyle:(DCUniMPC
         [DCUniMPSDKEngine setDelegate:self];
         resolve([NSNumber numberWithBool:YES]);
     } @catch (NSException *exception) {
-        reject([NSNumber numberWithBool:NO]);
+        reject(@"-1", exception.reason, nil);
     }
 }
 
@@ -45,7 +45,11 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary *)params CapsuleButtonStyle:(DCUniMPC
  */
 RCT_EXPORT_METHOD(isExistsApp:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    resolve([DCUniMPSDKEngine isExistsUniMP:appid]);
+    if ([DCUniMPSDKEngine isExistsUniMP:appid]) {
+        resolve(@YES);
+    } else {
+        reject(@"-1", @"小程序资源不存在", nil);
+    }
 }
 
 /**
@@ -54,16 +58,18 @@ RCT_EXPORT_METHOD(isExistsApp:(NSString *)appid resolver:(RCTPromiseResolveBlock
  */
 RCT_EXPORT_METHOD(getUniMPRunPathWithAppid:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    resolve([DCUniMPSDKEngine getUniMPRunPathWithAppid:appid]);
+    NSString *id = [DCUniMPSDKEngine getUniMPRunPathWithAppid:appid];
+    resolve(id);
 }
 
 /**
  * 获取已经部署的小程序应用资源版本信息
  * @param appid appid
  */
-RCT_EXPORT_METHOD(getUniMPVersionInfoWithAppid:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(getAppVersionInfo:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    resolve([DCUniMPSDKEngine getUniMPVersionInfoWithAppid:appid]);
+    NSDictionary *info = [DCUniMPSDKEngine getUniMPVersionInfoWithAppid:appid];
+    resolve(info);
 }
 
 /**
@@ -74,12 +80,23 @@ RCT_EXPORT_METHOD(getUniMPVersionInfoWithAppid:(NSString *)appid resolver:(RCTPr
  */
 RCT_EXPORT_METHOD(releaseWgtToRunPath:(NSString *)appid resourceFilePath:(NSString *)wgtPath password:(NSString *)password resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    NSError *error;
-    BOOL success = [DCUniMPSDKEngine installUniMPResourceWithAppid:appid resourceFilePath:wgtPath password:password error:&error];
-    if (success) {
-        resolve(success);
+    if (![DCUniMPSDKEngine isExistsUniMP:appid]) {
+        NSError *error;
+        NSString *appResourcePath = [[NSBundle mainBundle] pathForResource:appid ofType:@"wgt"];
+        if (!appResourcePath) {
+            reject(@"-1", @"资源路径不正确，请检查", nil);
+            return;
+        }
+        BOOL success = [DCUniMPSDKEngine installUniMPResourceWithAppid:appid resourceFilePath:wgtPath password:password error:&error];
+        if (success) {
+            // 应用资源文件部署成功
+            resolve([DCUniMPSDKEngine getUniMPVersionInfoWithAppid:appid]);
+        } else {
+            // 应用资源部署失败
+            reject(@"-1", @"应用资源部署失败", error);
+        }
     } else {
-        reject([NSNumber numberWithBool:NO], error);
+        reject(@"-1", @"应用资源已存在", nil);
     }
 }
 
@@ -88,15 +105,19 @@ RCT_EXPORT_METHOD(releaseWgtToRunPath:(NSString *)appid resourceFilePath:(NSStri
  * @param appid                   appid
  * @param configuration 小程序配置信息
  */
-RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(DCUniMPConfiguration * __nullable)configuration resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseResolveBlock)reject)
+RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(DCUniMPConfiguration * __nullable)configuration resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [DCUniMPSDKEngine openUniMP:appid configuration:configuration completed:^(DCUniMPInstance * _Nullable uniMPInstance, NSError * _Nullable error) {
-        if (uniMPInstance) {
-            resolve([NSNumber numberWithBool:YES]);
-        } else {
-            reject([NSNumber numberWithBool:NO], error);
-        }
-    }];
+    if ([DCUniMPSDKEngine isExistsUniMP:appid]) {
+        [DCUniMPSDKEngine openUniMP:appid configuration:configuration completed:^(DCUniMPInstance * _Nullable uniMPInstance, NSError * _Nullable error) {
+            if (uniMPInstance) {
+                resolve([NSNumber numberWithBool:YES]);
+            } else {
+                reject(@"-1", @"小程序开启失败", nil);
+            }
+        }];
+    } else {
+        reject(@"-1", @"未找到小程序应用资源", nil);
+    }
 }
 
 @end
