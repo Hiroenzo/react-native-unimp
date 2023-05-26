@@ -26,13 +26,13 @@ export declare interface InitializeProps {
   // 是否显示胶囊按钮
   capsule: boolean;
   // 胶囊按钮字体大小
-  fontSize: string;
+  fontSize?: string;
   // 胶囊按钮字体颜色
-  fontColor: string;
+  fontColor?: string;
   // 胶囊按钮字体宽度
-  fontWeight: string;
+  fontWeight?: string;
   // 设置小程序退出时是否进入后台
-  isEnableBackground: boolean;
+  isEnableBackground?: boolean;
 }
 
 /**
