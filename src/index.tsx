@@ -6,8 +6,8 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
-const Unimp = NativeModules.Unimp
-  ? NativeModules.Unimp
+const Unimp = NativeModules.UniMP
+  ? NativeModules.UniMP
   : new Proxy(
       {},
       {
@@ -26,13 +26,13 @@ export declare interface InitializeProps {
   // 是否显示胶囊按钮
   capsule: boolean;
   // 胶囊按钮字体大小
-  fontSize: string;
+  fontSize?: string;
   // 胶囊按钮字体颜色
-  fontColor: string;
+  fontColor?: string;
   // 胶囊按钮字体宽度
-  fontWeight: string;
+  fontWeight?: string;
   // 设置小程序退出时是否进入后台
-  isEnableBackground: boolean;
+  isEnableBackground?: boolean;
 }
 
 /**
@@ -74,9 +74,14 @@ export function isInitialize(): Promise<boolean> {
 
 /**
  * 获取小程序运行路径
+ * @param appid 小程序appid
  */
-export function getAppBasePath(): Promise<string> {
-  return Unimp.getAppBasePath();
+export function getAppBasePath(appid?: string): Promise<string> {
+  if (Platform.OS === 'android') {
+    return Unimp.getAppBasePath();
+  } else {
+    return Unimp.getAppBasePath(appid);
+  }
 }
 
 /**
@@ -87,7 +92,7 @@ export function getAppBasePath(): Promise<string> {
  */
 export function releaseWgtToRunPath(
   appid: string,
-  wgtPath: string,
+  wgtPath?: string | undefined | null,
   password?: string
 ): Promise<any> {
   return Unimp.releaseWgtToRunPath(appid, wgtPath, password);
@@ -100,6 +105,21 @@ export function releaseWgtToRunPath(
  */
 export function isExistsApp(appid: string): Promise<boolean> {
   return Unimp.isExistsApp(appid);
+}
+
+/**
+ * 读取导入到工程中的wgt应用资源
+ * 只支持iOS
+ * @param appid 小程序appid
+ */
+export function getResourceFilePath(
+  appid: string
+): Promise<string | undefined | null> {
+  if (Platform.OS === 'ios') {
+    return Unimp.getResourceFilePath(appid);
+  } else {
+    return Promise.reject({ message: '此方法只支持iOS版本' });
+  }
 }
 
 /**

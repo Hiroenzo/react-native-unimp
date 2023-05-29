@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class UnimpPackage implements ReactPackage {
+public class UniMPPackage implements ReactPackage {
   @NonNull
   @Override
   public List<NativeModule> createNativeModules(@NonNull ReactApplicationContext reactContext) {
     List<NativeModule> modules = new ArrayList<>();
-    modules.add(new UnimpModule(reactContext));
+    modules.add(new UniMPModule(reactContext));
     return modules;
   }
 
