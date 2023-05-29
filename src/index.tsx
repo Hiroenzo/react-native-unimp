@@ -74,9 +74,14 @@ export function isInitialize(): Promise<boolean> {
 
 /**
  * 获取小程序运行路径
+ * @param appid 小程序appid
  */
-export function getAppBasePath(): Promise<string> {
-  return Unimp.getAppBasePath();
+export function getAppBasePath(appid?: string): Promise<string> {
+  if (Platform.OS === 'android') {
+    return Unimp.getAppBasePath();
+  } else {
+    return Unimp.getAppBasePath(appid);
+  }
 }
 
 /**
@@ -87,7 +92,7 @@ export function getAppBasePath(): Promise<string> {
  */
 export function releaseWgtToRunPath(
   appid: string,
-  wgtPath: string,
+  wgtPath?: string | undefined | null,
   password?: string
 ): Promise<any> {
   return Unimp.releaseWgtToRunPath(appid, wgtPath, password);
@@ -100,6 +105,21 @@ export function releaseWgtToRunPath(
  */
 export function isExistsApp(appid: string): Promise<boolean> {
   return Unimp.isExistsApp(appid);
+}
+
+/**
+ * 读取导入到工程中的wgt应用资源
+ * 只支持iOS
+ * @param appid 小程序appid
+ */
+export function getResourceFilePath(
+  appid: string
+): Promise<string | undefined | null> {
+  if (Platform.OS === 'ios') {
+    return Unimp.getResourceFilePath(appid);
+  } else {
+    return Promise.reject({ message: '此方法只支持iOS版本' });
+  }
 }
 
 /**
