@@ -6,8 +6,8 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
-const Unimp = NativeModules.Unimp
-  ? NativeModules.Unimp
+const Unimp = NativeModules.UniMP
+  ? NativeModules.UniMP
   : new Proxy(
       {},
       {
