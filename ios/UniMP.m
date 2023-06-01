@@ -60,7 +60,7 @@ RCT_EXPORT_METHOD(isExistsApp:(NSString *)appid resolver:(RCTPromiseResolveBlock
  * 获取APP运行路径（应用资源目录）
  * @param appid 小程序appid
  */
-RCT_EXPORT_METHOD(getAppBasePath:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXPORT_METHOD(getUniMPRunPathWithAppid:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     @try {
         NSString *basePath = [DCUniMPSDKEngine getUniMPRunPathWithAppid:appid];
@@ -128,35 +128,41 @@ RCT_EXPORT_METHOD(releaseWgtToRunPath:(NSString *)appid resourceFilePath:(NSStri
 
 /**
  * 启动小程序
- * @param appid                   小程序appid
+ * @param appid         小程序appid
  * @param configuration 小程序配置信息
  */
 RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)configuration resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    if ([DCUniMPSDKEngine isExistsUniMP:appid]) {
-        // 初始化小程序的配置信息对象
-        DCUniMPConfiguration *config = [[DCUniMPConfiguration alloc] init];
-        // 配置启动小程序时传递的数据（目标小程序可在 App.onLaunch，App.onShow 中获取到启动时传递的数据）
-        // config.extraData = @{ @"launchInfo":@"Hello UniMP" };
-        // 开启后台运行
-        config.enableBackground = configuration[@"enableBackground"];
-        // 设置打开方式
-        config.openMode = DCUniMPOpenModePush;
-        // 启用侧滑手势关闭小程序
-        config.enableGestureClose = YES;
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [DCUniMPSDKEngine openUniMP:appid configuration:config completed:^(DCUniMPInstance * _Nullable uniMPInstance, NSError * _Nullable error) {
-                if (uniMPInstance) {
-                    resolve([NSNumber numberWithBool:YES]);
-                } else {
-                    NSLog(@"打开小程序出错：%@", error);
-                    reject(@"-1", @"小程序开启失败", nil);
-                }
-            }];
-        });
-    } else {
-        reject(@"-1", @"未找到小程序应用资源", nil);
+    @try {
+        if ([DCUniMPSDKEngine isExistsUniMP:appid]) {
+            // 初始化小程序的配置信息对象
+            DCUniMPConfiguration *config = [[DCUniMPConfiguration alloc] init];
+            
+            // 配置启动小程序时传递的数据（目标小程序可在 App.onLaunch，App.onShow 中获取到启动时传递的数据）
+            // config.extraData = @{};
+            // 开启后台运行
+            config.enableBackground = NO;
+            // 设置打开方式
+            config.openMode = DCUniMPOpenModePush;
+            // 启用侧滑手势关闭小程序
+            config.enableGestureClose = YES;
+            
+            // 需要在主线程中执行
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [DCUniMPSDKEngine openUniMP:appid configuration:config completed:^(DCUniMPInstance * _Nullable uniMPInstance, NSError * _Nullable error) {
+                    if (uniMPInstance) {
+                        resolve([NSNumber numberWithBool:YES]);
+                    } else {
+                        NSLog(@"打开小程序出错：%@", error);
+                        reject(@"-1", @"小程序开启失败", nil);
+                    }
+                }];
+            });
+        } else {
+            reject(@"-1", @"未找到小程序应用资源", nil);
+        }
+    } @catch (NSException *exception) {
+        reject(@"-1", exception.reason, nil);
     }
 }
 
