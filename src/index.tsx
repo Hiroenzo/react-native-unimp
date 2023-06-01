@@ -111,7 +111,7 @@ export function isExistsApp(appid: string): Promise<boolean> {
 }
 
 /**
- * 读取导入到工程中的wgt应用资源（iOS）
+ * 读取导入到工程中的wgt应用资源
  * @param appid 小程序appid
  */
 export function getWgtPath(appid: string): Promise<string> {
