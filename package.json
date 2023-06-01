@@ -39,7 +39,10 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "uni",
+    "unimp",
+    "uniapp"
   ],
   "repository": "https://github.com/Hiroenzo/react-native-unimp",
   "author": "Kyrie Chung <kyriechung@outlook.com> (https://github.com/Hiroenzo)",
