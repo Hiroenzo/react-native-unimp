@@ -6,7 +6,7 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
-const Unimp = NativeModules.UniMP
+const UniMP = NativeModules.UniMP
   ? NativeModules.UniMP
   : new Proxy(
       {},
@@ -58,16 +58,16 @@ export function initialize(
   params: InitializeProps,
   capsuleBtnStyle?: ICapsuleBtnStyleProps
 ): Promise<boolean> {
-  return Unimp.initialize(params, capsuleBtnStyle);
+  return UniMP.initialize(params, capsuleBtnStyle);
 }
 
 /**
- * 校验小程序SDK是否已初始化
+ * 校验小程序SDK是否已初始化（Android）
  */
 export function isInitialize(): Promise<boolean> {
   // 只支持Android
   if (Platform.OS === 'android') {
-    return Unimp.isInitialize();
+    return UniMP.isInitialize();
   }
   return Promise.resolve(true);
 }
@@ -78,16 +78,19 @@ export function isInitialize(): Promise<boolean> {
  */
 export function getAppBasePath(appid?: string): Promise<string> {
   if (Platform.OS === 'android') {
-    return Unimp.getAppBasePath();
+    return UniMP.getAppBasePath();
   } else {
-    return Unimp.getAppBasePath(appid);
+    if (!appid) {
+      return Promise.reject({ message: 'appid不能为空' });
+    }
+    return UniMP.getUniMPRunPathWithAppid(appid);
   }
 }
 
 /**
  * 将wgt包中的资源文件释放到uni小程序运行时路径下
- * @param appid    uni小程序的id
- * @param wgtPath  uni小程序应用资源包路径 仅支持SD路径 不支持assets
+ * @param appid    小程序appid
+ * @param wgtPath  小程序应用资源包路径 仅支持SD路径 不支持assets
  * @param password 资源包解压密码（猜的）
  */
 export function releaseWgtToRunPath(
@@ -95,7 +98,7 @@ export function releaseWgtToRunPath(
   wgtPath?: string | undefined | null,
   password?: string
 ): Promise<any> {
-  return Unimp.releaseWgtToRunPath(appid, wgtPath, password);
+  return UniMP.releaseWgtToRunPath(appid, wgtPath, password);
 }
 
 /**
@@ -104,30 +107,34 @@ export function releaseWgtToRunPath(
  * @param appid 小程序appid
  */
 export function isExistsApp(appid: string): Promise<boolean> {
-  return Unimp.isExistsApp(appid);
+  return UniMP.isExistsApp(appid);
 }
 
 /**
- * 读取导入到工程中的wgt应用资源
- * 只支持iOS
+ * 读取导入到工程中的wgt应用资源（iOS）
  * @param appid 小程序appid
  */
-export function getResourceFilePath(
-  appid: string
-): Promise<string | undefined | null> {
-  if (Platform.OS === 'ios') {
-    return Unimp.getResourceFilePath(appid);
-  } else {
-    return Promise.reject({ message: '此方法只支持iOS版本' });
-  }
+export function getWgtPath(appid: string): Promise<string> {
+  return UniMP.getWgtPath(appid);
+}
+
+export declare interface IExtraDataProps {
+  // 是否支持暗色模式
+  darkMode?: 'auto' | 'dark' | 'light';
 }
 
 /**
  * 开启小程序时传入的配置参数
  */
 export declare interface IConfigurationProps {
-  // 是否支持暗色模式
-  darkMode?: 'auto' | string;
+  // 配置启动小程序时传递的参数
+  extraData?: string | object | IExtraDataProps;
+  // 小程序启动方式
+  openMode?: 'DCUniMPOpenModePresent' | 'DCUniMPOpenModePush';
+  // 是否开启侧滑手势关闭小程序
+  enableGestureClose?: boolean;
+  // 是否开启后台运行
+  enableBackground?: boolean;
 }
 
 /**
@@ -135,19 +142,47 @@ export declare interface IConfigurationProps {
  * @param appid         uni小程序应用id
  * @param configuration uni小程序应用配置
  */
-export function openUniMP(
+export async function openUniMP(
   appid: string,
   configuration?: IConfigurationProps
 ): Promise<any> {
-  return Unimp.openUniMP(appid, configuration);
+  try {
+    if (Platform.OS === 'android') {
+      return UniMP.openUniMP(appid, configuration);
+    } else {
+      const isExists = await isExistsApp(appid);
+      if (!isExists) {
+        const wgtPath = await UniMP.getResourceFilePath(appid);
+        if (!wgtPath) {
+          return Promise.reject({ message: `未找到 ${appid} 的资源路径` });
+        }
+        await releaseWgtToRunPath(appid, wgtPath);
+      }
+      return UniMP.openUniMP(appid, configuration);
+    }
+  } catch (error) {
+    return Promise.reject(error);
+  }
+}
+
+/**
+ * uni小程序版本信息
+ */
+export declare interface IAppVersionInfoProps {
+  // versionName
+  name: string;
+  // versionCode
+  code: string;
 }
 
 /**
  * 获取uni小程序版本信息
  * @param appid uni小程序应用id
  */
-export function getAppVersionInfo(appid: string): Promise<any> {
-  return Unimp.getAppVersionInfo(appid);
+export function getAppVersionInfo(
+  appid: string
+): Promise<IAppVersionInfoProps> {
+  return UniMP.getAppVersionInfo(appid);
 }
 
 /**
@@ -167,7 +202,7 @@ export declare interface IMenuClickCallBackProps {
 export function setDefMenuButtonClickCallBack(
   callback: (arg: IMenuClickCallBackProps) => any
 ) {
-  Unimp.setDefMenuButtonClickCallBack((params: IMenuClickCallBackProps) =>
+  UniMP.setDefMenuButtonClickCallBack((params: IMenuClickCallBackProps) =>
     callback?.(params)
   );
 }
@@ -177,7 +212,7 @@ export function setDefMenuButtonClickCallBack(
  * @param callback 回调方法
  */
 export function setUniMPOnCloseCallBack(callback: (appid: string) => any) {
-  Unimp.setUniMPOnCloseCallBack((appid: string) => callback?.(appid));
+  UniMP.setUniMPOnCloseCallBack((appid: string) => callback?.(appid));
 }
 
 /**
@@ -187,7 +222,7 @@ export function setUniMPOnCloseCallBack(callback: (appid: string) => any) {
 export function setCapsuleCloseButtonClickCallBack(
   callback: (appid: string) => any
 ) {
-  Unimp.setCapsuleCloseButtonClickCallBack((appid: string) =>
+  UniMP.setCapsuleCloseButtonClickCallBack((appid: string) =>
     callback?.(appid)
   );
 }

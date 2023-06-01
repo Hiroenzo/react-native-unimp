@@ -5,15 +5,16 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.alibaba.fastjson.JSON;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableNativeMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -71,15 +72,32 @@ public class UniMPModule extends ReactContextBaseJavaModule {
    */
   @ReactMethod
   public void initialize(ReadableMap params, ReadableMap btnStyle, final Promise promise) {
-    MenuActionSheetItem item = new MenuActionSheetItem("关于", "gy");
+    // 更新小程序菜单
     List<MenuActionSheetItem> sheetItems = new ArrayList<>();
-    sheetItems.add(item);
+    ReadableArray items = params.getArray("items");
+    if (items != null && items.size() != 0) {
+      for (int i = 1; i < items.size(); i++) {
+        ReadableMap item = items.getMap(i);
+        sheetItems.add(new MenuActionSheetItem(item.getString("title"), item.getString("key")));
+      }
+    }
 
+    // 更新小程序胶囊按钮样式
     DCUniMPCapsuleButtonStyle style = new DCUniMPCapsuleButtonStyle();
-    style.setBackgroundColor(btnStyle.getString("backgroundColor"));
-    style.setTextColor(btnStyle.getString("textColor"));
-    style.setBorderColor(btnStyle.getString("borderColor"));
-    style.setHighlightColor(btnStyle.getString("highlightColor"));
+    if (btnStyle != null) {
+      if (btnStyle.hasKey("backgroundColor") && !btnStyle.isNull("backgroundColor")) {
+        style.setBackgroundColor(btnStyle.getString("backgroundColor"));
+      }
+      if (btnStyle.hasKey("textColor") && !btnStyle.isNull("textColor")) {
+        style.setTextColor(btnStyle.getString("textColor"));
+      }
+      if (btnStyle.hasKey("borderColor") && !btnStyle.isNull("borderColor")) {
+        style.setBorderColor(btnStyle.getString("borderColor"));
+      }
+      if (btnStyle.hasKey("highlightColor") && !btnStyle.isNull("highlightColor")) {
+        style.setHighlightColor(btnStyle.getString("highlightColor"));
+      }
+    }
 
     DCSDKInitConfig config = new DCSDKInitConfig.Builder()
         .setCapsule(params.getBoolean("capsule"))
@@ -90,6 +108,7 @@ public class UniMPModule extends ReactContextBaseJavaModule {
         .setEnableBackground(params.getBoolean("isEnableBackground"))
         .setMenuActionSheetItems(sheetItems)
         .build();
+
     DCUniMPSDK.getInstance().initialize(this.context, config, new IDCUniMPPreInitCallback() {
       @Override
       public void onInitFinished(boolean isSuccess) {
@@ -127,6 +146,21 @@ public class UniMPModule extends ReactContextBaseJavaModule {
   }
 
   /**
+   * 获取小程序wgt文件路径
+   *
+   * @param appid uni小程序的id
+   */
+  @ReactMethod
+  public void getWgtPath(String appid, final Promise promise) {
+    try {
+      String wgtPath = this.context.getExternalCacheDir().getPath() + "/" + appid + ".wgt";
+      promise.resolve(wgtPath);
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+  }
+
+  /**
    * 将wgt包中的资源文件释放到uni小程序运行时路径下
    *
    * @param appid    uni小程序的id
@@ -139,15 +173,13 @@ public class UniMPModule extends ReactContextBaseJavaModule {
     uniMPReleaseConfiguration.wgtPath = wgtPath;
     uniMPReleaseConfiguration.password = password;
 
-    // ReactApplicationContext context = this.context;
-
     DCUniMPSDK.getInstance().releaseWgtToRunPath(appid, uniMPReleaseConfiguration, new IUniMPReleaseCallBack() {
       @Override
       public void onCallBack(int code, Object pArgs) {
         Log.e("unimp", "code ---  " + code + "  pArgs --" + pArgs);
         try {
           if (code == 1) {
-            // DCUniMPSDK.getInstance().openUniMP(context, appid);
+            // DCUniMPSDK.getInstance().openUniMP(this.context, appid);
             promise.resolve(code);
           } else {
             throw new Exception((String) pArgs);
@@ -178,17 +210,31 @@ public class UniMPModule extends ReactContextBaseJavaModule {
   /**
    * 启动小程序
    *
-   * @param appid         uni小程序应用id
-   * @param configuration uni小程序应用配置
+   * @param appid         小程序appid
+   * @param configuration 小程序应用配置
    */
   @ReactMethod
   public void openUniMP(String appid, ReadableMap configuration, final Promise promise) {
     try {
       UniMPOpenConfiguration config = new UniMPOpenConfiguration();
+      if (configuration != null && configuration.hasKey("extraData")) {
+        ReadableMap extraData = configuration.getMap("extraData");
+        ReadableMapKeySetIterator iterator = extraData.keySetIterator();
+        while (iterator.hasNextKey()) {
+          String key = iterator.nextKey();
+          switch (extraData.getType(key)) {
+            case Boolean:
+              config.extraData.put(key, extraData.getBoolean(key));
+              break;
+            case String:
+              config.extraData.put(key, extraData.getString(key));
+              break;
+          }
+        }
+      }
       IUniMP unimp = DCUniMPSDK.getInstance().openUniMP(this.context, appid, config);
-      promise.resolve(true);
+      promise.resolve(unimp.getAppid());
     } catch (Exception e) {
-      e.printStackTrace();
       promise.reject(e);
     }
   }
