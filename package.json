@@ -1,7 +1,7 @@
 {
   "name": "react-native-unimp",
-  "version": "0.1.0",
-  "description": "test",
+  "version": "0.1.1",
+  "description": "ReactNative集成uni-app小程序SDK",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/index.d.ts",
