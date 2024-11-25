@@ -6,8 +6,8 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
-const UniMP = NativeModules.UniMP
-  ? NativeModules.UniMP
+const Unimp = NativeModules.Unimp
+  ? NativeModules.Unimp
   : new Proxy(
       {},
       {
@@ -58,7 +58,7 @@ export function initialize(
   params: InitializeProps,
   capsuleBtnStyle?: ICapsuleBtnStyleProps
 ): Promise<boolean> {
-  return UniMP.initialize(params, capsuleBtnStyle);
+  return Unimp.initialize(params, capsuleBtnStyle);
 }
 
 /**
@@ -67,7 +67,7 @@ export function initialize(
 export function isInitialize(): Promise<boolean> {
   // 只支持Android
   if (Platform.OS === 'android') {
-    return UniMP.isInitialize();
+    return Unimp.isInitialize();
   }
   return Promise.resolve(true);
 }
@@ -78,12 +78,12 @@ export function isInitialize(): Promise<boolean> {
  */
 export function getAppBasePath(appid?: string): Promise<string> {
   if (Platform.OS === 'android') {
-    return UniMP.getAppBasePath();
+    return Unimp.getAppBasePath();
   } else {
     if (!appid) {
       return Promise.reject({ message: 'appid不能为空' });
     }
-    return UniMP.getUniMPRunPathWithAppid(appid);
+    return Unimp.getUniMPRunPathWithAppid(appid);
   }
 }
 
@@ -98,7 +98,7 @@ export function releaseWgtToRunPath(
   wgtPath?: string | undefined | null,
   password?: string
 ): Promise<any> {
-  return UniMP.releaseWgtToRunPath(appid, wgtPath, password);
+  return Unimp.releaseWgtToRunPath(appid, wgtPath, password);
 }
 
 /**
@@ -107,7 +107,7 @@ export function releaseWgtToRunPath(
  * @param appid 小程序appid
  */
 export function isExistsApp(appid: string): Promise<boolean> {
-  return UniMP.isExistsApp(appid);
+  return Unimp.isExistsApp(appid);
 }
 
 /**
@@ -115,7 +115,7 @@ export function isExistsApp(appid: string): Promise<boolean> {
  * @param appid 小程序appid
  */
 export function getWgtPath(appid: string): Promise<string> {
-  return UniMP.getWgtPath(appid);
+  return Unimp.getWgtPath(appid);
 }
 
 export declare interface IExtraDataProps {
@@ -148,17 +148,17 @@ export async function openUniMP(
 ): Promise<any> {
   try {
     if (Platform.OS === 'android') {
-      return UniMP.openUniMP(appid, configuration);
+      return Unimp.openUniMP(appid, configuration);
     } else {
       const isExists = await isExistsApp(appid);
       if (!isExists) {
-        const wgtPath = await UniMP.getResourceFilePath(appid);
+        const wgtPath = await Unimp.getResourceFilePath(appid);
         if (!wgtPath) {
           return Promise.reject({ message: `未找到 ${appid} 的资源路径` });
         }
         await releaseWgtToRunPath(appid, wgtPath);
       }
-      return UniMP.openUniMP(appid, configuration);
+      return Unimp.openUniMP(appid, configuration);
     }
   } catch (error) {
     return Promise.reject(error);
@@ -182,7 +182,7 @@ export declare interface IAppVersionInfoProps {
 export function getAppVersionInfo(
   appid: string
 ): Promise<IAppVersionInfoProps> {
-  return UniMP.getAppVersionInfo(appid);
+  return Unimp.getAppVersionInfo(appid);
 }
 
 /**
@@ -202,7 +202,7 @@ export declare interface IMenuClickCallBackProps {
 export function setDefMenuButtonClickCallBack(
   callback: (arg: IMenuClickCallBackProps) => any
 ) {
-  UniMP.setDefMenuButtonClickCallBack((params: IMenuClickCallBackProps) =>
+  Unimp.setDefMenuButtonClickCallBack((params: IMenuClickCallBackProps) =>
     callback?.(params)
   );
 }
@@ -212,7 +212,7 @@ export function setDefMenuButtonClickCallBack(
  * @param callback 回调方法
  */
 export function setUniMPOnCloseCallBack(callback: (appid: string) => any) {
-  UniMP.setUniMPOnCloseCallBack((appid: string) => callback?.(appid));
+  Unimp.setUniMPOnCloseCallBack((appid: string) => callback?.(appid));
 }
 
 /**
@@ -222,7 +222,7 @@ export function setUniMPOnCloseCallBack(callback: (appid: string) => any) {
 export function setCapsuleCloseButtonClickCallBack(
   callback: (appid: string) => any
 ) {
-  UniMP.setCapsuleCloseButtonClickCallBack((appid: string) =>
+  Unimp.setCapsuleCloseButtonClickCallBack((appid: string) =>
     callback?.(appid)
   );
 }

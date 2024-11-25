@@ -37,13 +37,13 @@ import io.dcloud.feature.unimp.config.IUniMPReleaseCallBack;
 import io.dcloud.feature.unimp.config.UniMPOpenConfiguration;
 import io.dcloud.feature.unimp.config.UniMPReleaseConfiguration;
 
-@ReactModule(name = UniMPModule.NAME)
-public class UniMPModule extends ReactContextBaseJavaModule {
-  public static final String NAME = "UniMP";
+@ReactModule(name = UnimpModule.NAME)
+public class UnimpModule extends ReactContextBaseJavaModule {
+  public static final String NAME = "Unimp";
 
   ReactApplicationContext context;
 
-  public UniMPModule(ReactApplicationContext reactContext) {
+  public UnimpModule(ReactApplicationContext reactContext) {
     super(reactContext);
     this.context = reactContext;
   }
