@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
-#import "UniMP.h"
+#import "Unimp.h"
 
 #define UNIErrorDomain @" An Error Has Occurred"
 
-@implementation UniMP {
+@implementation Unimp {
     bool hasListeners;
 }
 
-RCT_EXPORT_MODULE(UniMP);
+RCT_EXPORT_MODULE(Unimp);
 
 - (NSArray<NSString *> *)supportedEvents {
   return @[@"onError"];
@@ -164,6 +164,27 @@ RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)conf
     } @catch (NSException *exception) {
         reject(@"-1", exception.reason, nil);
     }
+}
+
+#pragma mark - App 生命周期方法
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    [DCUniMPSDKEngine applicationDidBecomeActive:application];
+}
+
+- (void)applicationWillResignActive:(UIApplication *)application {
+    [DCUniMPSDKEngine applicationWillResignActive:application];
+}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    [DCUniMPSDKEngine applicationDidEnterBackground:application];
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+    [DCUniMPSDKEngine applicationWillEnterForeground:application];
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application {
+    [DCUniMPSDKEngine destory];
 }
 
 @end

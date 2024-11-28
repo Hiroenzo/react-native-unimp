@@ -4,6 +4,6 @@
 
 #import "DCUniMP.h"
 
-@interface UniMP : RCTEventEmitter <RCTBridgeModule,DCUniMPSDKEngineDelegate,RCTBridgeDelegate>
+@interface Unimp : RCTEventEmitter <RCTBridgeModule,DCUniMPSDKEngineDelegate,RCTBridgeDelegate>
 
 @end

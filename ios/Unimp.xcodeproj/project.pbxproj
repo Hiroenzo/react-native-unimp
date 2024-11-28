@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		09BCE5852A208C6D008320A3 /* UniMP.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* UniMP.m */; };
+		09BCE5852A208C6D008320A3 /* Unimp.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* Unimp.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,9 +24,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		134814201AA4EA6300B7C361 /* libUniMP.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libUniMP.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B3E7B5881CC2AC0600A0062D /* UniMP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UniMP.h; sourceTree = "<group>"; };
-		B3E7B5891CC2AC0600A0062D /* UniMP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UniMP.m; sourceTree = "<group>"; };
+		134814201AA4EA6300B7C361 /* libUnimp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libUnimp.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B3E7B5881CC2AC0600A0062D /* Unimp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Unimp.h; sourceTree = "<group>"; };
+		B3E7B5891CC2AC0600A0062D /* Unimp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Unimp.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,7 +43,7 @@
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				134814201AA4EA6300B7C361 /* libUniMP.a */,
+				134814201AA4EA6300B7C361 /* libUnimp.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -51,8 +51,8 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				B3E7B5881CC2AC0600A0062D /* UniMP.h */,
-				B3E7B5891CC2AC0600A0062D /* UniMP.m */,
+				B3E7B5881CC2AC0600A0062D /* Unimp.h */,
+				B3E7B5891CC2AC0600A0062D /* Unimp.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,9 +60,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		58B511DA1A9E6C8500147676 /* UniMP */ = {
+		58B511DA1A9E6C8500147676 /* Unimp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "UniMP" */;
+			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "Unimp" */;
 			buildPhases = (
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
@@ -72,9 +72,9 @@
 			);
 			dependencies = (
 			);
-			name = UniMP;
+			name = Unimp;
 			productName = RCTDataManager;
-			productReference = 134814201AA4EA6300B7C361 /* libUniMP.a */;
+			productReference = 134814201AA4EA6300B7C361 /* libUnimp.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -91,7 +91,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "UniMP" */;
+			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "Unimp" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -104,7 +104,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				58B511DA1A9E6C8500147676 /* UniMP */,
+				58B511DA1A9E6C8500147676 /* Unimp */,
 			);
 		};
 /* End PBXProject section */
@@ -114,7 +114,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				09BCE5852A208C6D008320A3 /* UniMP.m in Sources */,
+				09BCE5852A208C6D008320A3 /* Unimp.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,7 +233,7 @@
 					"$(inherited)",
 					"-ObjC",
 				);
-				PRODUCT_NAME = UniMP;
+				PRODUCT_NAME = Unimp;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -255,7 +255,7 @@
 					"$(inherited)",
 					"-ObjC",
 				);
-				PRODUCT_NAME = UniMP;
+				PRODUCT_NAME = Unimp;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -263,7 +263,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "UniMP" */ = {
+		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "Unimp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511ED1A9E6C8500147676 /* Debug */,
@@ -272,7 +272,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "UniMP" */ = {
+		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "Unimp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,
