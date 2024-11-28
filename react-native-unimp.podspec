@@ -16,9 +16,5 @@ Pod::Spec.new do |s|
   s.source_files = "ios/**/*.{h,m,mm}"
 
   s.dependency "React"
-  s.vendored_frameworks = 'ios/libs/**/*.framework'
-  s.resources = 'ios/Resources/**/*.{js,ttf,bundle}'
-  s.vendored_libraries = "ios/libs/**/*.a"
-  s.frameworks = "JavaScriptCore","CoreMedia","MediaPlayer","AVFoundation","AVKit","GLKit","OpenGLES","CoreText","QuartzCore","CoreGraphics","QuickLook","CoreTelephony"
-  # s.library = "c++"
+  s.dependency 'unimp/Core'
 end
