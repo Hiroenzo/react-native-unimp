@@ -54,16 +54,17 @@ uni小程序SDK包文件夹目录结构说明：
 	|-- libs //原生功能依赖库
 
 ```
+> 更新1.0.0版本后不需要此操作
 
-SDK包中的**assets**需要拷贝到项目中，目录一般在**app/src/main/assets**下.
+~~SDK包中的```assets```需要拷贝到项目中，目录一般在```app/src/main/assets```下.~~
 
 #### 2. 导入小程序应用资源
 
-打开android原生项目。在主Module模块的assets路径下创建apps/(内置uni小程序的appid)/www 路径，例如**apps/__UNI__04E3A11/www**，将之前导出的应用资源包解压释放到apps/__UNI__04E3A11/www路径下(解压方法将资源包的扩展 .wgt 重命名为 .zip 然后使用解压软件打开)
+打开android原生项目。在主Module模块的```assets```路径下创建```apps/(内置uni小程序的appid)/www```路径，例如```apps/__UNI__04E3A11/www```，将之前导出的应用资源包解压释放到```apps/__UNI__04E3A11/www```路径下(解压方法将资源包的扩展```.wgt```重命名为```.zip```然后使用解压软件打开)
 
 #### 3. 修改gradle配置
 
-在**android/app/build.gradle**中，添加以下配置，否则可能会出现无法开启小程序，并提示 **运行路径中无 uni 小程序(\_\_UNI\_\_XXXXXXXX)应用资源，请检查应用资源是否正常部署**的问题：
+在```android/app/build.gradle```中，添加以下配置，否则可能会出现无法开启小程序，并提示 **运行路径中无 uni 小程序(\_\_UNI\_\_XXXXXXXX)应用资源，请检查应用资源是否正常部署**的问题：
 
 ```
 android {
@@ -90,7 +91,11 @@ android {
 
 ### iOS配置
 
-#### 1. 初始化 sdk engine
+#### 1. 安装Git LFS
+
+部分依赖库文件较大，需要安装```git-lfs```插件下载大文件，终端执行git lfs version查看本地是否已安装该插件，如未安装参考安装[Git LFS](https://docs.github.com/zh/enterprise-server@3.8/repositories/working-with-files/managing-large-files/installing-git-large-file-storage)
+
+#### 2. 初始化 sdk engine
 
 在**AppDelegate.m**中：
 
@@ -152,13 +157,13 @@ android {
 
 ```
 
-#### 2. 导入小程序应用资源
+#### 3. 导入小程序应用资源
 
 打开原生工程目录，在iOS项目路径中创建名称为Apps的文件夹，将之前导出的wgt包拷贝到Apps文件夹中，再右键菜单中选择Add Files to “工程名...”，然后打开工程目录，选择 Apps 文件夹，然后点击“Add”，将应用资源包添加到工程中。
 
 > iOS已改用Pod方式集成，以下配置可以跳过
 
-#### ~~3. 配置CocoaPods~~
+#### ~~4. 配置CocoaPods~~
 
 ~~打开**podfile**文件，添加以下内容：~~
 
