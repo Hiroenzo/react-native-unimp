@@ -3,18 +3,6 @@
 
 #define UNIErrorDomain @" An Error Has Occurred"
 
-@interface Unimp () <DCUniMPSDKEngineDelegate>
-
-@property (nonatomic, weak) NSMutableDictionary *uniMPInstance; /**< 保存当前打开的小程序应用的引用 注意：请使用 weak 修辞，否则应在关闭小程序时置为 nil */
-
-// 添加键值对
-- (void)setValue:(id)value forKey:(NSString *)key;
-
-// 获取值
-- (id)valueForKey:(NSString *)key;
-
-@end
-
 @implementation Unimp {
     bool hasListeners;
 }
@@ -180,12 +168,12 @@ RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)conf
             // 启用侧滑手势关闭小程序
             config.enableGestureClose = YES;
 
-            __weak __typeof(self)weakSelf = self;
             // 需要在主线程中执行
             dispatch_async(dispatch_get_main_queue(), ^{
                 [DCUniMPSDKEngine openUniMP:appid configuration:config completed:^(DCUniMPInstance * _Nullable uniMPInstance, NSError * _Nullable error) {
                     if (uniMPInstance) {
                         [self.uniMPInstance setValue:uniMPInstance forKey:appid];
+                        [self uniMPOnClose:appid];
                         resolve([NSNumber numberWithBool:YES]);
                     } else {
                         NSLog(@"打开小程序出错：%@", error);
