@@ -3,8 +3,41 @@
 
 #define UNIErrorDomain @" An Error Has Occurred"
 
+@interface Unimp () <DCUniMPSDKEngineDelegate>
+
+@property (nonatomic, weak) NSMutableDictionary *uniMPInstance; /**< 保存当前打开的小程序应用的引用 注意：请使用 weak 修辞，否则应在关闭小程序时置为 nil */
+
+// 添加键值对
+- (void)setValue:(id)value forKey:(NSString *)key;
+
+// 获取值
+- (id)valueForKey:(NSString *)key;
+
+@end
+
 @implementation Unimp {
     bool hasListeners;
+}
+
+// 初始化存储容器
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _uniMPInstance = [NSMutableDictionary dictionary];
+    }
+    return self;
+}
+
+// 设置值
+- (void)setValue:(id)value forKey:(NSString *)key {
+    if (key && value) {
+        [self.uniMPInstance setObject:value forKey:key];
+    }
+}
+
+// 获取值
+- (id)valueForKey:(NSString *)key {
+    return [self.uniMPInstance objectForKey:key];
 }
 
 RCT_EXPORT_MODULE(Unimp);
@@ -23,18 +56,18 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary *)params CapsuleButtonStyle:(NSDictio
     @try {
         NSArray *items = params[@"items"];
         NSMutableArray *sheetItems = [NSMutableArray array];
-        
+
         for (int i=0; i<items.count; i++) {
             NSLog(@"-> %@",items[i]);
             [sheetItems addObject:[[DCUniMPMenuActionSheetItem alloc] initWithTitle:items[i][@"title"] identifier:items[i][@"key"]]];
         }
-        
+
         [DCUniMPSDKEngine setDefaultMenuItems:sheetItems];
-        
+
         //if (!params[@"btnStyle"]) {
         //    [DCUniMPSDKEngine configCapsuleButtonStyle:btnStyle];
         //}
-        
+
         //[DCUniMPSDKEngine setMenuButtonHidden:!params[@"capsule"]];
         [DCUniMPSDKEngine setDelegate:self];
         resolve([NSNumber numberWithBool:YES]);
@@ -82,7 +115,7 @@ RCT_EXPORT_METHOD(getAppVersionInfo:(NSString *)appid resolver:(RCTPromiseResolv
     } @catch (NSException *exception) {
         reject(@"-1", exception.reason, nil);
     }
-    
+
 }
 
 /**
@@ -137,7 +170,7 @@ RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)conf
         if ([DCUniMPSDKEngine isExistsUniMP:appid]) {
             // 初始化小程序的配置信息对象
             DCUniMPConfiguration *config = [[DCUniMPConfiguration alloc] init];
-            
+
             // 配置启动小程序时传递的数据（目标小程序可在 App.onLaunch，App.onShow 中获取到启动时传递的数据）
             // config.extraData = @{};
             // 开启后台运行
@@ -146,11 +179,13 @@ RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)conf
             config.openMode = DCUniMPOpenModePush;
             // 启用侧滑手势关闭小程序
             config.enableGestureClose = YES;
-            
+
+            __weak __typeof(self)weakSelf = self;
             // 需要在主线程中执行
             dispatch_async(dispatch_get_main_queue(), ^{
                 [DCUniMPSDKEngine openUniMP:appid configuration:config completed:^(DCUniMPInstance * _Nullable uniMPInstance, NSError * _Nullable error) {
                     if (uniMPInstance) {
+                        [self.uniMPInstance setValue:uniMPInstance forKey:appid];
                         resolve([NSNumber numberWithBool:YES]);
                     } else {
                         NSLog(@"打开小程序出错：%@", error);
@@ -166,25 +201,60 @@ RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)conf
     }
 }
 
-#pragma mark - App 生命周期方法
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-    [DCUniMPSDKEngine applicationDidBecomeActive:application];
+/**
+ * 关闭当前运行的小程序
+ */
+RCT_EXPORT_METHOD(closeUniMP:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    [[self.uniMPInstance objectForKey:appid] closeWithCompletion:^(BOOL success, NSError * _Nullable error) {
+        if (success) {
+            [self.uniMPInstance setValue:nil forKey:appid];
+            resolve([NSNumber numberWithBool:YES]);
+        } else {
+            NSLog(@"小程序关闭失败： %@ ", error);
+            reject(@"-1", @"小程序关闭失败", nil);
+        }
+    }];
 }
 
-- (void)applicationWillResignActive:(UIApplication *)application {
-    [DCUniMPSDKEngine applicationWillResignActive:application];
+/// 监听关闭小程序的回调方法
+- (void)uniMPOnClose:(NSString *)appid {
+    NSLog(@"小程序 %@ 被关闭了",appid);
+    [self.uniMPInstance setValue:nil forKey:appid];
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-    [DCUniMPSDKEngine applicationDidEnterBackground:application];
+/**
+ * 启动小程序
+ * @param appid         小程序appid
+ * @param configuration 小程序配置信息
+ */
+RCT_EXPORT_METHOD(showOrHideUniMP:(NSString *)appid show:(BOOL *)show resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    if (show) {
+        [[self.uniMPInstance objectForKey:appid] showWithCompletion:^(BOOL success, NSError * _Nullable error) {
+            if (success) {
+                resolve([NSNumber numberWithBool:YES]);
+            } else {
+                NSLog(@"小程序唤起至前台失败： %@ ", error);
+                reject(@"-1", @"小程序唤起至前台失败", nil);
+            }
+        }];
+    } else {
+        [[self.uniMPInstance objectForKey:appid] hideWithCompletion:^(BOOL success, NSError * _Nullable error) {
+            if (success) {
+                resolve([NSNumber numberWithBool:YES]);
+            } else {
+                NSLog(@"小程序切换至后台失败： %@ ", error);
+                reject(@"-1", @"小程序切换至后台失败", nil);
+            }
+        }];
+    }
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-    [DCUniMPSDKEngine applicationWillEnterForeground:application];
-}
-
-- (void)applicationWillTerminate:(UIApplication *)application {
-    [DCUniMPSDKEngine destory];
+/**
+ * 宿主 App 向小程序发送事件
+ */
+RCT_EXPORT_METHOD(sendUniMPEvent:(NSString *)appid eventName:(NSString *)eventName data:(NSDictionary *)data resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    [[self.uniMPInstance objectForKey:appid] sendUniMPEvent:eventName data:data];
+    resolve([NSNumber numberWithBool:YES]);
 }
 
 @end
