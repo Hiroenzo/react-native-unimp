@@ -7,27 +7,6 @@
     bool hasListeners;
 }
 
-// 初始化存储容器
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        _uniMPInstance = [NSMutableDictionary dictionary];
-    }
-    return self;
-}
-
-// 设置值
-- (void)setValue:(id)value forKey:(NSString *)key {
-    if (key && value) {
-        [self.uniMPInstance setObject:value forKey:key];
-    }
-}
-
-// 获取值
-- (id)valueForKey:(NSString *)key {
-    return [self.uniMPInstance objectForKey:key];
-}
-
 RCT_EXPORT_MODULE(Unimp);
 
 - (NSArray<NSString *> *)supportedEvents {
@@ -39,8 +18,7 @@ RCT_EXPORT_MODULE(Unimp);
  * @param params  小程序胶囊按钮参数
  * @param btnStyle 胶囊按钮样式
  */
-RCT_EXPORT_METHOD(initialize:(NSDictionary *)params CapsuleButtonStyle:(NSDictionary *)btnStyle resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(initialize:(NSDictionary *)params CapsuleButtonStyle:(NSDictionary *)btnStyle resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     @try {
         NSArray *items = params[@"items"];
         NSMutableArray *sheetItems = [NSMutableArray array];
@@ -68,8 +46,7 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary *)params CapsuleButtonStyle:(NSDictio
  * 检查当前appid资源是否存在
  * @param appid 小程序appid
  */
-RCT_EXPORT_METHOD(isExistsApp:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(isExistsApp:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     if ([DCUniMPSDKEngine isExistsUniMP:appid]) {
         resolve([NSNumber numberWithBool:YES]);
     } else {
@@ -81,8 +58,7 @@ RCT_EXPORT_METHOD(isExistsApp:(NSString *)appid resolver:(RCTPromiseResolveBlock
  * 获取APP运行路径（应用资源目录）
  * @param appid 小程序appid
  */
-RCT_EXPORT_METHOD(getUniMPRunPathWithAppid:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(getUniMPRunPathWithAppid:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     @try {
         NSString *basePath = [DCUniMPSDKEngine getUniMPRunPathWithAppid:appid];
         resolve(basePath);
@@ -95,8 +71,7 @@ RCT_EXPORT_METHOD(getUniMPRunPathWithAppid:(NSString *)appid resolver:(RCTPromis
  * 获取已经部署的小程序应用资源版本信息
  * @param appid 小程序appid
  */
-RCT_EXPORT_METHOD(getAppVersionInfo:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(getAppVersionInfo:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     @try {
         NSDictionary *info = [DCUniMPSDKEngine getUniMPVersionInfoWithAppid:appid];
         resolve(info);
@@ -110,8 +85,7 @@ RCT_EXPORT_METHOD(getAppVersionInfo:(NSString *)appid resolver:(RCTPromiseResolv
  * 读取导入到工程中的wgt应用资源
  * @param appid 小程序appid
  */
-RCT_EXPORT_METHOD(getResourceFilePath:(NSString *)appid resolve:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(getResourceFilePath:(NSString *)appid resolve:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     @try {
         NSString *resourcePath = [[NSBundle mainBundle] pathForResource:appid ofType:@"wgt"];
         resolve(resourcePath);
@@ -124,8 +98,7 @@ RCT_EXPORT_METHOD(getResourceFilePath:(NSString *)appid resolve:(RCTPromiseResol
  * 将wgt资源部署到运行路径中
  * @param appid 小程序appid
  */
-RCT_EXPORT_METHOD(releaseWgtToRunPath:(NSString *)appid resourceFilePath:(NSString *)wgtPath password:(NSString *)password resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(releaseWgtToRunPath:(NSString *)appid resourceFilePath:(NSString *)wgtPath password:(NSString *)password resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     #warning 注意：isExistsUniMP: 方法判断的仅是运行路径中是否有对应的应用资源，宿主还需要做好内置wgt版本的管理，如果更新了内置的wgt也应该执行 installUniMPResourceWithAppid 方法应用最新的资源
     if (![DCUniMPSDKEngine isExistsUniMP:appid]) {
         if (!wgtPath) {
@@ -152,8 +125,7 @@ RCT_EXPORT_METHOD(releaseWgtToRunPath:(NSString *)appid resourceFilePath:(NSStri
  * @param appid         小程序appid
  * @param configuration 小程序配置信息
  */
-RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)configuration resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
+RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)configuration resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     @try {
         if ([DCUniMPSDKEngine isExistsUniMP:appid]) {
             // 初始化小程序的配置信息对象
@@ -162,11 +134,11 @@ RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)conf
             // 配置启动小程序时传递的数据（目标小程序可在 App.onLaunch，App.onShow 中获取到启动时传递的数据）
             // config.extraData = @{};
             // 开启后台运行
-            config.enableBackground = NO;
+            // config.enableBackground = NO;
             // 设置打开方式
-            config.openMode = DCUniMPOpenModePush;
+            // config.openMode = DCUniMPOpenModePresent;
             // 启用侧滑手势关闭小程序
-            config.enableGestureClose = YES;
+            // config.enableGestureClose = YES;
 
             // 需要在主线程中执行
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -195,7 +167,6 @@ RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)conf
 RCT_EXPORT_METHOD(closeUniMP:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     [[self.uniMPInstance objectForKey:appid] closeWithCompletion:^(BOOL success, NSError * _Nullable error) {
         if (success) {
-            [self.uniMPInstance setValue:nil forKey:appid];
             resolve([NSNumber numberWithBool:YES]);
         } else {
             NSLog(@"小程序关闭失败： %@ ", error);
