@@ -5,24 +5,26 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.alibaba.fastjson.JSON;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.dcloud.feature.sdk.DCSDKInitConfig;
 import io.dcloud.feature.sdk.DCUniMPCapsuleButtonStyle;
@@ -30,9 +32,11 @@ import io.dcloud.feature.sdk.DCUniMPSDK;
 import io.dcloud.feature.sdk.Interface.IDCUniMPOnCapsuleCloseButtontCallBack;
 import io.dcloud.feature.sdk.Interface.IDCUniMPPreInitCallback;
 import io.dcloud.feature.sdk.Interface.IMenuButtonClickCallBack;
+import io.dcloud.feature.sdk.Interface.IOnUniMPEventCallBack;
 import io.dcloud.feature.sdk.Interface.IUniMP;
 import io.dcloud.feature.sdk.Interface.IUniMPOnCloseCallBack;
 import io.dcloud.feature.sdk.MenuActionSheetItem;
+import io.dcloud.feature.unimp.DCUniMPJSCallback;
 import io.dcloud.feature.unimp.config.IUniMPReleaseCallBack;
 import io.dcloud.feature.unimp.config.UniMPOpenConfiguration;
 import io.dcloud.feature.unimp.config.UniMPReleaseConfiguration;
@@ -41,7 +45,10 @@ import io.dcloud.feature.unimp.config.UniMPReleaseConfiguration;
 public class UnimpModule extends ReactContextBaseJavaModule {
   public static final String NAME = "Unimp";
 
-  ReactApplicationContext context;
+  private final ReactApplicationContext context;
+
+  private static final Map<String, IUniMP> iUniMPMap = new HashMap<>();
+  private static boolean isBackgroundMode = false;
 
   public UnimpModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -99,6 +106,10 @@ public class UnimpModule extends ReactContextBaseJavaModule {
       }
     }
 
+    if (params.hasKey("isEnableBackground")) {
+      isBackgroundMode = params.getBoolean("isEnableBackground");
+    }
+
     DCSDKInitConfig config = new DCSDKInitConfig.Builder()
         .setCapsule(params.getBoolean("capsule"))
         .setCapsuleButtonStyle(style)
@@ -112,7 +123,7 @@ public class UnimpModule extends ReactContextBaseJavaModule {
     DCUniMPSDK.getInstance().initialize(this.context, config, new IDCUniMPPreInitCallback() {
       @Override
       public void onInitFinished(boolean isSuccess) {
-        Log.e("unimp", "onInitFinished-----------" + isSuccess);
+        Log.e(NAME, "onInitFinished-----------" + isSuccess);
         promise.resolve(isSuccess);
       }
     });
@@ -176,7 +187,7 @@ public class UnimpModule extends ReactContextBaseJavaModule {
     DCUniMPSDK.getInstance().releaseWgtToRunPath(appid, uniMPReleaseConfiguration, new IUniMPReleaseCallBack() {
       @Override
       public void onCallBack(int code, Object pArgs) {
-        Log.e("unimp", "code ---  " + code + "  pArgs --" + pArgs);
+        Log.e(NAME, "code ---  " + code + "  pArgs --" + pArgs);
         try {
           if (code == 1) {
             // DCUniMPSDK.getInstance().openUniMP(this.context, appid);
@@ -229,13 +240,98 @@ public class UnimpModule extends ReactContextBaseJavaModule {
             case String:
               config.extraData.put(key, extraData.getString(key));
               break;
+            case Map:
+              config.extraData.put(key, extraData.getMap(key));
+              break;
+            case Array:
+              config.extraData.put(key, extraData.getArray(key));
+              break;
           }
         }
       }
       IUniMP unimp = DCUniMPSDK.getInstance().openUniMP(this.context, appid, config);
-      promise.resolve(unimp.getAppid());
+      iUniMPMap.put(appid, unimp);
+      promise.resolve(appid);
     } catch (Exception e) {
       promise.reject(e);
+    }
+  }
+
+  /**
+   * 手动调用关闭小程序
+   *
+   * @param appid 小程序ID
+   */
+  @ReactMethod
+  public void closeUniMP(String appid, final Promise promise) {
+    IUniMP uniMP = iUniMPMap.get(appid);
+    if (uniMP != null && uniMP.isRuning()) {
+      boolean result = uniMP.closeUniMP();
+      if (result) {
+        iUniMPMap.remove(appid);
+      }
+      promise.resolve(result);
+    } else {
+      promise.reject(new Exception(appid + "小程序未开启"));
+    }
+  }
+
+  /**
+   * 当前小程序显示到前台/退到后台。仅开启后台模式生效！
+   *
+   * @param appid 小程序ID
+   * @param show  显示或隐藏
+   */
+  @ReactMethod
+  public void showOrHideUniMP(String appid, boolean show, final Promise promise) {
+    IUniMP uniMP = iUniMPMap.get(appid);
+    if (uniMP != null && uniMP.isRuning()) {
+      if (isBackgroundMode) {
+        boolean result;
+        if (show) {
+          result = uniMP.showUniMP();
+        } else {
+          result = uniMP.hideUniMP();
+        }
+        promise.resolve(result);
+      } else {
+        promise.reject(new Exception("仅开启后台模式生效"));
+      }
+    } else {
+      promise.reject(new Exception(appid + "小程序未开启"));
+    }
+  }
+
+  /**
+   * 宿主主动触发事件到正在运行的小程序
+   *
+   * @param appid     小程序ID
+   * @param eventName 事件名
+   * @param data      传参
+   */
+  @ReactMethod
+  public void sendUniMPEvent(String appid, String eventName, ReadableMap data, final Promise promise) {
+    IUniMP uniMP = iUniMPMap.get(appid);
+    if (uniMP != null && uniMP.isRuning()) {
+      uniMP.sendUniMPEvent(eventName, data);
+    } else {
+      promise.reject(new Exception(appid + "小程序未开启"));
+    }
+  }
+
+  /**
+   * 获取运行时uni小程序的当前页面url 可用于页面直达等操作的地址
+   *
+   * @param appid 小程序ID
+   */
+  @ReactMethod
+  public void getCurrentPageUrl(String appid, final Promise promise) {
+    IUniMP uniMP = iUniMPMap.get(appid);
+    if (uniMP != null && uniMP.isRuning()) {
+      String url = uniMP.getCurrentPageUrl();
+      promise.resolve(url);
+    } else {
+      promise.reject(new Exception(appid + "小程序未开启"));
     }
   }
 
@@ -260,52 +356,127 @@ public class UnimpModule extends ReactContextBaseJavaModule {
 
   /**
    * 小程序菜单点击事件回调
-   *
-   * @param callback 回调事件
    */
   @ReactMethod
-  public void setDefMenuButtonClickCallBack(final Callback callback) {
+  public void setDefMenuButtonClickCallBack() {
     DCUniMPSDK.getInstance().setDefMenuButtonClickCallBack(new IMenuButtonClickCallBack() {
       @Override
-      public void onClick(String appid, String buttonid) {
-        Log.e("unimp", "点击了" + appid + "的" + buttonid);
+      public void onClick(String appid, String buttonId) {
+        Log.e(NAME, "点击了" + appid + "的" + buttonId);
         WritableMap params = new WritableNativeMap();
         params.putString("appid", appid);
-        params.putString("buttonid", buttonid);
-        callback.invoke(params);
+        params.putString("buttonId", buttonId);
+        sendEvent("onMenuButtonClick", params);
       }
     });
   }
 
   /**
    * 监听小程序被关闭事件
-   *
-   * @param callback 回调事件
    */
   @ReactMethod
-  public void setUniMPOnCloseCallBack(final Callback callback) {
+  public void setUniMPOnCloseCallBack() {
     DCUniMPSDK.getInstance().setUniMPOnCloseCallBack(new IUniMPOnCloseCallBack() {
       @Override
       public void onClose(String appid) {
-        Log.e("unimp", appid + "被关闭了");
-        callback.invoke(appid);
+        Log.e(NAME, appid + "被关闭了");
+        WritableMap params = new WritableNativeMap();
+        params.putString("appid", appid);
+        sendEvent("onClose", params);
       }
     });
   }
 
   /**
    * 小程序胶囊按钮点击关闭事件
-   *
-   * @param callback 回调事件
    */
   @ReactMethod
-  public void setCapsuleCloseButtonClickCallBack(final Callback callback) {
+  public void setCapsuleCloseButtonClickCallBack() {
     DCUniMPSDK.getInstance().setCapsuleCloseButtonClickCallBack(new IDCUniMPOnCapsuleCloseButtontCallBack() {
       @Override
       public void closeButtonClicked(String appid) {
-        Log.e("unimp", appid + "胶囊点击了关闭按钮");
-        callback.invoke(appid);
+        Log.i(NAME, appid + "胶囊点击了关闭按钮");
+        WritableMap params = new WritableNativeMap();
+        params.putString("appid", appid);
+        sendEvent("onCapsuleCloseButtonClick", params);
       }
     });
+  }
+
+  /**
+   * 设置监听小程序发送给宿主的事件
+   */
+  @ReactMethod
+  public void setOnUniMPEventCallBack() {
+    DCUniMPSDK.getInstance().setOnUniMPEventCallBack(new IOnUniMPEventCallBack() {
+      @Override
+      public void onUniMPEventReceive(String appid, String event, Object data, DCUniMPJSCallback dcUniMPJSCallback) {
+        WritableMap params = new WritableNativeMap();
+        params.putString("appid", appid);
+        params.putString("event", event);
+        ReadableMap receiveData = objectToReadableMap(data);
+        params.putMap("data", receiveData);
+        sendEvent("onEventReceive", params);
+      }
+    });
+  }
+
+  private static ReadableMap objectToReadableMap(Object object) {
+    WritableMap map = Arguments.createMap();
+
+    if (object instanceof Map<?, ?> objMap) {
+      for (Map.Entry<?, ?> entry : objMap.entrySet()) {
+        String key = entry.getKey().toString();
+        Object value = entry.getValue();
+
+        if (value instanceof String) {
+          map.putString(key, (String) value);
+        } else if (value instanceof Integer) {
+          map.putInt(key, (Integer) value);
+        } else if (value instanceof Double) {
+          map.putDouble(key, (Double) value);
+        } else if (value instanceof Boolean) {
+          map.putBoolean(key, (Boolean) value);
+        } else if (value instanceof Map) {
+          map.putMap(key, objectToReadableMap(value));
+        } else if (value instanceof List) {
+          map.putArray(key, objectToReadableArray((List<?>) value));
+        } else if (value == null) {
+          map.putNull(key);
+        } else {
+          throw new IllegalArgumentException("Unsupported value type: " + value.getClass().getName());
+        }
+      }
+    } else {
+      throw new IllegalArgumentException("Input object is not a Map.");
+    }
+
+    return map;
+  }
+
+  public static ReadableArray objectToReadableArray(List<?> list) {
+    WritableArray array = Arguments.createArray();
+
+    for (Object item : list) {
+      if (item instanceof String) {
+        array.pushString((String) item);
+      } else if (item instanceof Integer) {
+        array.pushInt((Integer) item);
+      } else if (item instanceof Double) {
+        array.pushDouble((Double) item);
+      } else if (item instanceof Boolean) {
+        array.pushBoolean((Boolean) item);
+      } else if (item instanceof Map) {
+        array.pushMap(objectToReadableMap(item));
+      } else if (item instanceof List) {
+        array.pushArray(objectToReadableArray((List<?>) item));
+      } else if (item == null) {
+        array.pushNull();
+      } else {
+        throw new IllegalArgumentException("Unsupported array element type: " + item.getClass().getName());
+      }
+    }
+
+    return array;
   }
 }
