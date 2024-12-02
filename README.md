@@ -180,14 +180,17 @@ android {
 
 ## 支持的接口
 
-| 序号 | 接口名称            | 参数                                                         | 支持平台      | 描述                                                         |
-| ---- | ------------------- | ------------------------------------------------------------ | ------------- | ------------------------------------------------------------ |
-| 1    | initialize          | params: InitializeProps, capsuleBtnStyle?: ICapsuleBtnStyleProps | Android / iOS | 小程序初始化方法，支持初始化胶囊按钮样式和菜单               |
-| 2    | isInitialize        | /                                                            | Android       | 检测小程序引擎是否已经初始化                                 |
-| 3    | getAppBasePath      | appid?: string                                               | Android / iOS | 获取小程序运行路径                                           |
-| 4    | releaseWgtToRunPath | appid: string, wgtPath?: string, password?: string           | Android / iOS | 将wgt包中的资源文件释放到uni小程序运行时路径下               |
-| 5    | getWgtPath          | appid: string                                                | Android / iOS | 读取导入到工程中的wgt应用资源                                |
-| 6    | isExistsApp         | appid: string                                                | Android / iOS | 检查当前appid小程序是否已释放wgt资源，可用来检查当前appid资源是否存在 |
-| 7    | openUniMP           | appid: string, configuration?: IConfigurationProps           | Android / iOS | 启动小程序                                                   |
-| 8    | getAppVersionInfo   | appid: string                                                | Android / iOS | 获取uni小程序版本信息                                        |
+| 序号 | 接口名称            | 参数                                                               | 支持平台      | 描述                                        |
+|----| ------------------- |------------------------------------------------------------------| ------------- |-------------------------------------------|
+| 1  | initialize          | params: InitializeProps, capsuleBtnStyle?: ICapsuleBtnStyleProps | Android / iOS | 小程序初始化方法，支持初始化胶囊按钮样式和菜单                   |
+| 2  | isInitialize        | /                                                                | Android       | 检测小程序引擎是否已经初始化                            |
+| 3  | getAppBasePath      | appid?: string                                                   | Android / iOS | 获取小程序运行路径                                 |
+| 4  | releaseWgtToRunPath | appid: string, wgtPath?: string, password?: string               | Android / iOS | 将wgt包中的资源文件释放到uni小程序运行时路径下                |
+| 5  | getWgtPath          | appid: string                                                    | Android / iOS | 读取导入到工程中的wgt应用资源                          |
+| 6  | isExistsApp         | appid: string                                                    | Android / iOS | 检查当前appid小程序是否已释放wgt资源，可用来检查当前appid资源是否存在 |
+| 7  | openUniMP           | appid: string, configuration?: IConfigurationProps               | Android / iOS | 启动小程序                                     |
+| 8  | getAppVersionInfo   | appid: string                                                    | Android / iOS | 获取uni小程序版本信息                              |
+| 9  | closeUniMP   | appid: string                                                    | Android / iOS | 宿主关闭小程序                                   |
+| 10 | showOrHideUniMP   | appid: string, show: boolean                                     | Android / iOS | 当前小程序显示到前台/退到后台                                   |
+| 11 | sendUniMPEvent   | appid: string, eventName: string, data: Record<string, any>                         | Android / iOS | 宿主主动触发事件到正在运行的小程序                                   |
 
