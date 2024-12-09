@@ -1,5 +1,9 @@
 # react-native-unimp
 
+![GitHub License](https://img.shields.io/github/license/hiroenzo/react-native-unimp)
+![NPM Downloads](https://img.shields.io/npm/d18m/react-native-unimp)
+![Node Current](https://img.shields.io/node/v/react-native-unimp)
+
 > 集成uni小程序SDK，支持**Android**和**iOS**，目前只集成了基础模块，其他原生功能依赖库需要自行集成。
 
 ## SDK 版本
