@@ -5,7 +5,7 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:7.2.1"
+    classpath 'com.android.tools.build:gradle:8.7.3'
   }
 }
 
@@ -89,8 +89,10 @@ dependencies {
 
   implementation "com.squareup.okhttp3:okhttp:3.7.0"
   implementation "com.squareup.okio:okio:1.8.0"
-  // add since 2022-12-29
-  implementation "androidx.webkit:webkit:1.3.0" //3.6.15版本之后，用来支持暗黑模式
+  // 重要：更新版本至1.5.0
+  implementation 'androidx.webkit:webkit:1.5.0' // 3.6.15版本之后，用来支持暗黑模式
+  // 重要：避免部分设备可能卡死的问题
+  annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 }
 
 if (isNewArchitectureEnabled()) {
