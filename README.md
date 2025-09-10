@@ -1,8 +1,8 @@
 # react-native-unimp
 
-![GitHub License](https://img.shields.io/github/license/hiroenzo/react-native-unimp)
-![NPM Downloads](https://img.shields.io/npm/d18m/react-native-unimp)
-![Node Current](https://img.shields.io/node/v/react-native-unimp)
+![GitHub License](https://img.shields.io/github/license/Hiroenzo/react-native-unimp?style=for-the-badge&logo=github&link=https%3A%2F%2Fgithub.com%2FHiroenzo%2Freact-native-unimp)
+![NPM Downloads](https://img.shields.io/npm/d18m/react-native-unimp?style=for-the-badge&logo=npm&link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Freact-native-unimp)
+![Node Current](https://img.shields.io/node/v/react-native-unimp?style=for-the-badge&logo=nodedotjs)
 
 > 集成uni小程序SDK，支持**Android**和**iOS**，目前只集成了基础模块，其他原生功能依赖库需要自行集成。
 
