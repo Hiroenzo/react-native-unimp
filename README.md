@@ -101,7 +101,9 @@ android {
 
 #### 2. 初始化 sdk engine
 
-在**AppDelegate.m**中：
+> 低于 `React Native 0.77.0` 版本
+
+在 `AppDelegate.m` 中：
 
 ```c++
 #import "DCUniMP.h"
@@ -157,6 +159,121 @@ android {
   // 通过通用链接唤起 App
   [DCUniMPSDKEngine application:application continueUserActivity:userActivity];
   return YES;
+}
+
+```
+
+> 高于 `React Native 0.77.0` 版本
+
+首先在 `*-Brdging-Header.h` 文件中导入 `DCUniMP` 模块
+
+```c++
+//
+//  Use this file to import your target's public headers that you would like to expose to Swift.
+//
+#define uabp_Bridging_Header_h
+
+#import "DCUniMP.h"
+```
+
+在 `AppDelegate.swift` 中
+
+```swift
+import UIKit
+import React
+import React_RCTAppDelegate
+import ReactAppDependencyProvider
+
+@main
+// 2. 阿里云推送 AppDelegate 遵循 UNUserNotificationCenterDelegate 协议
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate  {
+  var window: UIWindow?
+
+  var reactNativeDelegate: ReactNativeDelegate?
+  var reactNativeFactory: RCTReactNativeFactory?
+
+  func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+  ) -> Bool {
+    let delegate = ReactNativeDelegate()
+    let factory = RCTReactNativeFactory(delegate: delegate)
+    delegate.dependencyProvider = RCTAppDependencyProvider()
+
+    reactNativeDelegate = delegate
+    reactNativeFactory = factory
+    
+    // 3. 设置通知代理 (必须在应用启动时设置)
+    UNUserNotificationCenter.current().delegate = self
+
+    window = UIWindow(frame: UIScreen.main.bounds)
+
+    factory.startReactNative(
+      withModuleName: "uabp",
+      in: window,
+      launchOptions: launchOptions
+    )
+
+    // 1. 创建一个可变字典，用于配置 SDK 启动参数
+    // 这里的 options 类型需要是 [AnyHashable: Any] 来兼容 Objective-C 的 SDK
+    var options: [AnyHashable: Any] = launchOptions ?? [:]
+
+    // 2. 设置 debug 参数为 YES，会在控制台输出 JS log
+    // 注意：需要引入 liblibLog.a 库才能看到 JS log
+    // 我们使用 NSNumber(value: true) 来确保正确桥接到 Objective-C 的 BOOL/NSNumber 类型
+    options["debug"] = NSNumber(value: true)
+
+    // 3. 初始化引擎
+    DCUniMPSDKEngine.initSDKEnvironment(launchOptions: options)
+
+    return true
+  }
+  
+  // MARK: - App Lifecycle Methods (DCUniMPSDK)
+
+  /// Called when the application is about to become the active state.
+  func applicationDidBecomeActive(_ application: UIApplication) {
+      // Call the DCUniMPSDK method corresponding to app activation
+      DCUniMPSDKEngine.applicationDidBecomeActive(application)
+  }
+
+  /// Called when the application is about to move from active to inactive state.
+  func applicationWillResignActive(_ application: UIApplication) {
+      // Call the DCUniMPSDK method corresponding to app resigning active state
+      DCUniMPSDKEngine.applicationWillResignActive(application)
+  }
+
+  /// Called when the application is entering the background state.
+  func applicationDidEnterBackground(_ application: UIApplication) {
+      // Call the DCUniMPSDK method corresponding to entering background
+      DCUniMPSDKEngine.applicationDidEnterBackground(application)
+  }
+
+  /// Called when the application is about to enter the foreground from the background state.
+  func applicationWillEnterForeground(_ application: UIApplication) {
+      // Call the DCUniMPSDK method corresponding to entering foreground
+      DCUniMPSDKEngine.applicationWillEnterForeground(application)
+  }
+
+  /// Called when the application is about to terminate.
+  func applicationWillTerminate(_ application: UIApplication) {
+      // Call the SDK's destory method to clean up resources before termination.
+      DCUniMPSDKEngine.destory()
+  }
+}
+
+class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
+  override func sourceURL(for bridge: RCTBridge) -> URL? {
+    self.bundleURL()
+  }
+
+  override func bundleURL() -> URL? {
+#if DEBUG
+    RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+#else
+    Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+#endif
+  }
 }
 
 ```
