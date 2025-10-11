@@ -93,6 +93,8 @@ android {
 2024-11-28 16:10:12.573  6748-7055  weex           com.unimpexample         E  getLibLdPath is running /data/app/com.unimpexample-_xag59cq6fFJxVJuCI463A==/lib/arm64:/data/app/com.unimpexample-_xag59cq6fFJxVJuCI463A==/base.apk!/lib/arm64-v8a
 ```
 
+**检查minSdkVersion 取值范围 19~22 注意>=23 一定要配置android:extractNativeLibs="true"**
+
 ### iOS配置
 
 #### 1. 安装Git LFS
