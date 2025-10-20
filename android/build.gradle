@@ -58,9 +58,9 @@ android {
 repositories {
   mavenCentral()
   google()
-  flatDir {
-    dirs "libs"
-  }
+  // flatDir {
+  //   dirs "libs"
+  // }
 }
 
 
@@ -72,7 +72,11 @@ dependencies {
 
   // uni-app
   //导入SDK相关依赖jar、aar
-  implementation fileTree(dir: "libs", include: ["*.aar", "*.jar"])
+  implementation(group: 'com.uniapp', name: 'android-gif-drawable', version: '4.75', ext: 'aar')
+  implementation(group: 'com.uniapp', name: 'base_oaid_sdk', version: '4.75', ext: 'aar')
+  implementation(group: 'com.uniapp', name: 'breakpad-build', version: '4.75', ext: 'aar')
+  implementation(group: 'com.uniapp', name: 'uniapp-v8', version: '4.75', ext: 'aar')
+  implementation(group: 'com.uniapp', name: 'uniMPSDK-V2', version: '4.75', ext: 'aar')
   //必须添加的依赖
   implementation "androidx.recyclerview:recyclerview:1.0.0" // android 自带recyclerview支持
   implementation "androidx.legacy:legacy-support-v4:1.0.0" // androidx support支持
