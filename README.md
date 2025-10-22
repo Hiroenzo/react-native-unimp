@@ -41,6 +41,8 @@ Unimp.initialize(
 ## 配置
 ### Android配置
 
+把 android/libs 下的文件按早build.gradle的引入格式，导入到 `JFrog` 或其他的 maven 仓库，并添加 maven 仓库地址到你项目的 android/build.gradle
+
 #### 1. 添加资源文件
 
 uni小程序SDK包文件夹目录结构说明：
@@ -202,7 +204,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     reactNativeDelegate = delegate
     reactNativeFactory = factory
-    
+
     // 3. 设置通知代理 (必须在应用启动时设置)
     UNUserNotificationCenter.current().delegate = self
 
@@ -228,7 +230,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     return true
   }
-  
+
   // MARK: - App Lifecycle Methods (DCUniMPSDK)
 
   /// Called when the application is about to become the active state.
