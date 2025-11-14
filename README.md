@@ -1,13 +1,13 @@
 # react-native-unimp
 
-![GitHub License](https://img.shields.io/github/license/Hiroenzo/react-native-unimp?style=for-the-badge&logo=github&link=https%3A%2F%2Fgithub.com%2FHiroenzo%2Freact-native-unimp)
 ![NPM Downloads](https://img.shields.io/npm/d18m/react-native-unimp?style=for-the-badge&logo=npm&link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Freact-native-unimp)
 ![Node Current](https://img.shields.io/node/v/react-native-unimp?style=for-the-badge&logo=nodedotjs)
 
 > 集成uni小程序SDK，支持**Android**和**iOS**，目前只集成了基础模块，其他原生功能依赖库需要自行集成。
 
 ## SDK 版本
-当前已更新至2025年07月15日发布的 **SDK 4.75 版本**
+- `Android`已更新至2025年11月11日发布的 **SDK 4.85 版本**
+- `ios`版本为 **SDK 4.75 版本**
 
 ## 示例
 
@@ -41,28 +41,32 @@ Unimp.initialize(
 ## 配置
 ### Android配置
 
-把 android/libs 下的文件按早build.gradle的引入格式，导入到 `JFrog` 或其他的 maven 仓库，并添加 maven 仓库地址到你项目的 android/build.gradle
+#### 1. 集成SDK文件
 
-#### 1. 添加资源文件
+修改原生集成方式，已移除 `android/libs` 下的 `aar` 文件，按照 `build.gradle` 的引入格式，导入到 `JFrog` 或其他的 `maven` 仓库，并添加 `maven` 仓库地址到你项目的 `android/build.gradle`，示例如下：
+```gradle
+buildscript {
+    ext {
+      ...
+    }
+    repositories {
+        google()
+        mavenCentral()
+        maven { url '这里添加本地的maven仓库地址' }
+    }
+    dependencies {
+      ...
+    }
+}
 
-uni小程序SDK包文件夹目录结构说明：
-
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url '这里添加本地的maven仓库地址' }
+    }
+}
 ```
-|-- uniMPSDK/SDK	//uni小程序SDK
-	|-- assets		// assets资源文件
-	|-- Libs		//依赖库
-	|-- res			// 资源文件
-	|-- src			//微信分享支付需要的activity
-	|-- AndroidManifest.xml //模块配置信息
-	|-- proguard.cfg  //混淆配置
-/-- uniMPSDK/DEMO	//uni小程序SDK示例DEMO
-/-- uniMPSDK\Features // 框架已有的原生功能依赖库
-	|-- libs //原生功能依赖库
-
-```
-> 更新1.0.0版本后不需要此操作
-
-~~SDK包中的```assets```需要拷贝到项目中，目录一般在```app/src/main/assets```下.~~
 
 #### 2. 导入小程序应用资源
 
@@ -85,7 +89,7 @@ android {
 
 #### 4. 异常情况
 
-如果出现打开小程序后界面空白，**Logcat**显示以下日志，需要将**android/build.gradle**的**targetSdkVersion**改为**28**即可。
+如果出现打开小程序后界面空白，`Logcat` 显示以下日志，需要将 `android/build.gradle` 的`targetSdkVersion` 改为 `28` 即可。
 
 ```azure
 2024-11-28 16:10:12.573  6748-7055  WXParams       com.unimpexample         E  setCrashFilePath: /data/user/0/com.unimpexample/app_crash
@@ -94,6 +98,8 @@ android {
 2024-11-28 16:10:12.573  6748-7055  weex           com.unimpexample         E  getLibJsbPath is running /data/user/0/com.unimpexample/cache/cache/weex/libs/weexjsb/arm64-v8a/libweexjsb.so
 2024-11-28 16:10:12.573  6748-7055  weex           com.unimpexample         E  getLibLdPath is running /data/app/com.unimpexample-_xag59cq6fFJxVJuCI463A==/lib/arm64:/data/app/com.unimpexample-_xag59cq6fFJxVJuCI463A==/base.apk!/lib/arm64-v8a
 ```
+
+检查 `minSdkVersion` 取值范围 `19~22` 注意 `>=23` 一定要在原生项目主app的`AndroidManifest.xml` 中的 `application` 节点配置 `android:extractNativeLibs="true"`
 
 ### iOS配置
 
@@ -316,4 +322,5 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 | 9  | closeUniMP   | appid: string                                                    | Android / iOS | 宿主关闭小程序                                   |
 | 10 | showOrHideUniMP   | appid: string, show: boolean                                     | Android / iOS | 当前小程序显示到前台/退到后台                                   |
 | 11 | sendUniMPEvent   | appid: string, eventName: string, data: Record<string, any>                         | Android / iOS | 宿主主动触发事件到正在运行的小程序                                   |
+| 12 | getCurrentPageUrl   | appid: string | Android / iOS | 获取运行时uni小程序的当前页面url 可用于页面直达等操作的地址 |
 
