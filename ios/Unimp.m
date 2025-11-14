@@ -165,7 +165,8 @@ RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)conf
  * 关闭当前运行的小程序
  */
 RCT_EXPORT_METHOD(closeUniMP:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    [[self.uniMPInstance objectForKey:appid] closeWithCompletion:^(BOOL success, NSError * _Nullable error) {
+    DCUniMPInstance *instance = [self.uniMPInstance objectForKey:appid];
+    [instance closeWithCompletion:^(BOOL success, NSError * _Nullable error) {
         if (success) {
             resolve([NSNumber numberWithBool:YES]);
         } else {
@@ -188,7 +189,8 @@ RCT_EXPORT_METHOD(closeUniMP:(NSString *)appid resolver:(RCTPromiseResolveBlock)
  */
 RCT_EXPORT_METHOD(showOrHideUniMP:(NSString *)appid show:(BOOL *)show resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     if (show) {
-        [[self.uniMPInstance objectForKey:appid] showWithCompletion:^(BOOL success, NSError * _Nullable error) {
+        DCUniMPInstance *instance = [self.uniMPInstance objectForKey:appid];
+        [instance showWithCompletion:^(BOOL success, NSError * _Nullable error) {
             if (success) {
                 resolve([NSNumber numberWithBool:YES]);
             } else {
@@ -197,7 +199,7 @@ RCT_EXPORT_METHOD(showOrHideUniMP:(NSString *)appid show:(BOOL *)show resolver:(
             }
         }];
     } else {
-        [[self.uniMPInstance objectForKey:appid] hideWithCompletion:^(BOOL success, NSError * _Nullable error) {
+        [instance hideWithCompletion:^(BOOL success, NSError * _Nullable error) {
             if (success) {
                 resolve([NSNumber numberWithBool:YES]);
             } else {
@@ -205,6 +207,28 @@ RCT_EXPORT_METHOD(showOrHideUniMP:(NSString *)appid show:(BOOL *)show resolver:(
                 reject(@"-1", @"小程序切换至后台失败", nil);
             }
         }];
+    }
+}
+
+/**
+ * 获取当前小程序页面的直达链接URL
+ * @param appid 小程序appid
+ */
+RCT_EXPORT_METHOD(getCurrentPageUrl:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    @try {
+        DCUniMPInstance *instance = [self.uniMPInstance objectForKey:appid];
+        if (instance) {
+            NSString *pageURL = [DCUniMPSDKEngine getCurrentPageUrl];
+            if (pageURL) {
+                resolve(pageURL);
+            } else {
+                resolve(@"");
+            }
+        } else {
+            reject(@"-1", @"小程序实例不存在", nil);
+        }
+    } @catch (NSException *exception) {
+        reject(@"-1", exception.reason, nil);
     }
 }
 
