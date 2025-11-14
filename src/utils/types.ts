@@ -47,6 +47,8 @@ export declare interface IConfigurationProps {
   enableGestureClose?: boolean;
   // 是否开启后台运行
   enableBackground?: boolean;
+  // 可用于页面直达等操作的地址
+  redirectPath?: string;
 }
 
 /**

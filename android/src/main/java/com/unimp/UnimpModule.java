@@ -227,7 +227,15 @@ public class UnimpModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void openUniMP(String appid, ReadableMap configuration, final Promise promise) {
     try {
+      // 检查SDK是否已初始化
+      if (!DCUniMPSDK.getInstance().isInitialize()) {
+        promise.reject(new Exception("SDK未初始化，请先调用initialize方法"));
+        return;
+      }
+
       UniMPOpenConfiguration config = new UniMPOpenConfiguration();
+      
+      // 处理extraData参数
       if (configuration != null && configuration.hasKey("extraData")) {
         ReadableMap extraData = configuration.getMap("extraData");
         ReadableMapKeySetIterator iterator = extraData.keySetIterator();
@@ -249,10 +257,60 @@ public class UnimpModule extends ReactContextBaseJavaModule {
           }
         }
       }
+      
+      // 处理redirectPath参数 - 小程序页面直达地址
+      if (configuration != null && configuration.hasKey("redirectPath") && !configuration.isNull("redirectPath")) {
+        config.redirectPath = configuration.getString("redirectPath");
+      }
+      
+      // 处理arguments参数 - 小程序启动参数
+      if (configuration != null && configuration.hasKey("arguments") && !configuration.isNull("arguments")) {
+        ReadableMap arguments = configuration.getMap("arguments");
+        if (arguments != null) {
+          JSONObject argsJson = new JSONObject();
+          ReadableMapKeySetIterator iterator = arguments.keySetIterator();
+          while (iterator.hasNextKey()) {
+            String key = iterator.nextKey();
+            switch (arguments.getType(key)) {
+              case Boolean:
+                argsJson.put(key, arguments.getBoolean(key));
+                break;
+              case String:
+                argsJson.put(key, arguments.getString(key));
+                break;
+              case Number:
+                argsJson.put(key, arguments.getDouble(key));
+                break;
+              case Map:
+                argsJson.put(key, arguments.getMap(key));
+                break;
+              case Array:
+                argsJson.put(key, arguments.getArray(key));
+                break;
+            }
+          }
+          config.arguments = argsJson;
+        }
+      }
+      
+      // 处理splashView参数 - 自定义启动页
+      if (configuration != null && configuration.hasKey("splashClass") && !configuration.isNull("splashClass")) {
+        // 注意：splashClass需要是IDCUniMPAppSplashView接口的实现类的完整类名
+        // 这里暂时不实现，因为需要具体的类实现
+        Log.w(NAME, "splashClass参数暂未实现，需要自定义IDCUniMPAppSplashView实现类");
+      }
+      
+      // 启动小程序
       IUniMP unimp = DCUniMPSDK.getInstance().openUniMP(this.context, appid, config);
-      iUniMPMap.put(appid, unimp);
-      promise.resolve(appid);
+      
+      if (unimp != null) {
+        iUniMPMap.put(appid, unimp);
+        promise.resolve(appid);
+      } else {
+        promise.reject(new Exception("启动小程序失败，返回的IUniMP对象为null"));
+      }
     } catch (Exception e) {
+      Log.e(NAME, "启动小程序异常", e);
       promise.reject(e);
     }
   }

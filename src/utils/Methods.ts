@@ -149,3 +149,11 @@ export function getAppVersionInfo(
 ): Promise<IAppVersionInfoProps> {
   return Unimp.getAppVersionInfo(appid);
 }
+
+/**
+ * 获取运行时uni小程序的当前页面url 可用于页面直达等操作的地址
+ * @param appid 当前运行的小程序应用id
+ */
+export function getCurrentPageUrl(appid: string): Promise<string> {
+  return Unimp.getCurrentPageUrl(appid);
+}
