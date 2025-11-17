@@ -1,13 +1,28 @@
 import { Platform } from 'react-native';
 
-import { Unimp } from './NativeUniMP';
+import { Unimp } from './NativeUnimp';
 
 import type {
   IAppVersionInfoProps,
   ICapsuleBtnStyleProps,
   IConfigurationProps,
   InitializeProps,
-} from './types';
+} from './Types';
+
+// 错误处理辅助函数
+async function handleNativeCall<T>(
+  method: () => Promise<T>,
+  fallback?: T
+): Promise<T> {
+  try {
+    return await method();
+  } catch (error) {
+    if (fallback !== undefined) {
+      return fallback;
+    }
+    throw error;
+  }
+}
 
 /**
  * 初始化小程序SDK
@@ -18,7 +33,10 @@ export function initialize(
   params: InitializeProps,
   capsuleBtnStyle?: ICapsuleBtnStyleProps
 ): Promise<boolean> {
-  return Unimp.initialize(params, capsuleBtnStyle);
+  return handleNativeCall(
+    () => Unimp.initialize(params, capsuleBtnStyle),
+    false
+  );
 }
 
 /**
@@ -27,7 +45,7 @@ export function initialize(
 export function isInitialize(): Promise<boolean> {
   // 只支持Android
   if (Platform.OS === 'android') {
-    return Unimp.isInitialize();
+    return handleNativeCall(() => Unimp.isInitialize(), false);
   }
   return Promise.resolve(true);
 }
@@ -38,12 +56,12 @@ export function isInitialize(): Promise<boolean> {
  */
 export function getAppBasePath(appid?: string): Promise<string> {
   if (Platform.OS === 'android') {
-    return Unimp.getAppBasePath();
+    return handleNativeCall(() => Unimp.getAppBasePath(), '');
   } else {
     if (!appid) {
       return Promise.reject({ message: 'appid不能为空' });
     }
-    return Unimp.getUniMPRunPathWithAppid(appid);
+    return handleNativeCall(() => Unimp.getUniMPRunPathWithAppid(appid), '');
   }
 }
 
@@ -58,7 +76,10 @@ export function releaseWgtToRunPath(
   wgtPath?: string | null,
   password?: string
 ): Promise<any> {
-  return Unimp.releaseWgtToRunPath(appid, wgtPath, password);
+  return handleNativeCall(
+    () => Unimp.releaseWgtToRunPath(appid, wgtPath, password),
+    null
+  );
 }
 
 /**
@@ -67,7 +88,7 @@ export function releaseWgtToRunPath(
  * @param appid 小程序appid
  */
 export function isExistsApp(appid: string): Promise<boolean> {
-  return Unimp.isExistsApp(appid);
+  return handleNativeCall(() => Unimp.isExistsApp(appid), false);
 }
 
 /**
@@ -75,7 +96,7 @@ export function isExistsApp(appid: string): Promise<boolean> {
  * @param appid 小程序appid
  */
 export function getWgtPath(appid: string): Promise<string> {
-  return Unimp.getWgtPath(appid);
+  return handleNativeCall(() => Unimp.getWgtPath(appid), '');
 }
 
 /**
@@ -89,17 +110,26 @@ export async function openUniMP(
 ): Promise<any> {
   try {
     if (Platform.OS === 'android') {
-      return Unimp.openUniMP(appid, configuration);
+      return handleNativeCall(
+        () => Unimp.openUniMP(appid, configuration),
+        null
+      );
     } else {
       const isExists = await isExistsApp(appid);
       if (!isExists) {
-        const wgtPath = await Unimp.getResourceFilePath(appid);
+        const wgtPath = await handleNativeCall(
+          () => Unimp.getResourceFilePath(appid),
+          ''
+        );
         if (!wgtPath) {
           return Promise.reject({ message: `未找到 ${appid} 的资源路径` });
         }
         await releaseWgtToRunPath(appid, wgtPath);
       }
-      return Unimp.openUniMP(appid, configuration);
+      return handleNativeCall(
+        () => Unimp.openUniMP(appid, configuration),
+        null
+      );
     }
   } catch (error) {
     return Promise.reject(error);
@@ -111,7 +141,7 @@ export async function openUniMP(
  * @param appid 小程序ID
  */
 export async function closeUniMP(appid: string): Promise<boolean> {
-  return Unimp.closeUniMP(appid);
+  return handleNativeCall(() => Unimp.closeUniMP(appid), false);
 }
 
 /**
@@ -123,7 +153,7 @@ export async function showOrHideUniMP(
   appid: string,
   show: boolean
 ): Promise<boolean> {
-  return Unimp.showOrHideUniMP(appid, show);
+  return handleNativeCall(() => Unimp.showOrHideUniMP(appid, show), false);
 }
 
 /**
@@ -137,7 +167,10 @@ export async function sendUniMPEvent(
   eventName: string,
   data: Record<string, any>
 ): Promise<boolean> {
-  return Unimp.sendUniMPEvent(appid, eventName, data);
+  return handleNativeCall(
+    () => Unimp.sendUniMPEvent(appid, eventName, data),
+    false
+  );
 }
 
 /**
@@ -147,7 +180,22 @@ export async function sendUniMPEvent(
 export function getAppVersionInfo(
   appid: string
 ): Promise<IAppVersionInfoProps> {
-  return Unimp.getAppVersionInfo(appid);
+  return handleNativeCall(
+    async () => {
+      const result = await Unimp.getAppVersionInfo(appid);
+      // 确保返回的对象符合 IAppVersionInfoProps 接口
+      if (
+        result &&
+        typeof result === 'object' &&
+        'name' in result &&
+        'code' in result
+      ) {
+        return result as IAppVersionInfoProps;
+      }
+      return { name: '', code: '' };
+    },
+    { name: '', code: '' }
+  );
 }
 
 /**
@@ -155,5 +203,5 @@ export function getAppVersionInfo(
  * @param appid 当前运行的小程序应用id
  */
 export function getCurrentPageUrl(appid: string): Promise<string> {
-  return Unimp.getCurrentPageUrl(appid);
+  return handleNativeCall(() => Unimp.getCurrentPageUrl(appid), '');
 }
