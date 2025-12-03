@@ -30,11 +30,11 @@ RCT_EXPORT_METHOD(initialize:(NSDictionary *)params CapsuleButtonStyle:(NSDictio
 
         [DCUniMPSDKEngine setDefaultMenuItems:sheetItems];
 
-        //if (!params[@"btnStyle"]) {
-        //    [DCUniMPSDKEngine configCapsuleButtonStyle:btnStyle];
-        //}
+        if (!params[@"btnStyle"]) {
+           [DCUniMPSDKEngine configCapsuleButtonStyle:btnStyle];
+        }
 
-        //[DCUniMPSDKEngine setMenuButtonHidden:!params[@"capsule"]];
+        [DCUniMPSDKEngine setMenuButtonHidden:!params[@"capsule"]];
         [DCUniMPSDKEngine setDelegate:self];
         resolve([NSNumber numberWithBool:YES]);
     } @catch (NSException *exception) {
@@ -58,13 +58,13 @@ RCT_EXPORT_METHOD(isExistsApp:(NSString *)appid resolver:(RCTPromiseResolveBlock
  * 获取APP运行路径（应用资源目录）
  * @param appid 小程序appid
  */
-RCT_EXPORT_METHOD(getUniMPRunPathWithAppid:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
-    @try {
-        NSString *basePath = [DCUniMPSDKEngine getUniMPRunPathWithAppid:appid];
-        resolve(basePath);
-    } @catch (NSException *exception) {
-        reject(@"-1", exception.reason, nil);
-    }
+RCT_EXPORT_METHOD(getAppBasePath:(NSString *)appid resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+  @try {
+    NSString *basePath = [DCUniMPSDKEngine getUniMPRunPathWithAppid:appid];
+    resolve(basePath);
+  } @catch (NSException *exception) {
+    reject(@"-1", exception.reason, nil);
+  }
 }
 
 /**
@@ -132,13 +132,23 @@ RCT_EXPORT_METHOD(openUniMP:(NSString *)appid configuration:(NSDictionary *)conf
             DCUniMPConfiguration *config = [[DCUniMPConfiguration alloc] init];
 
             // 配置启动小程序时传递的数据（目标小程序可在 App.onLaunch，App.onShow 中获取到启动时传递的数据）
-            // config.extraData = @{};
+            if (configuration[@"extraData"]) {
+                config.extraData = configuration[@"extraData"];
+            }
             // 开启后台运行
-            // config.enableBackground = NO;
+            config.enableBackground = configuration[@"enableBackground"] ? [configuration[@"enableBackground"] boolValue] : NO;
             // 设置打开方式
-            // config.openMode = DCUniMPOpenModePresent;
+            if (configuration[@"openMode"]) {
+                config.openMode = [configuration[@"openMode"] integerValue];
+            } else {
+                config.openMode = DCUniMPOpenModePresent;
+            }
             // 启用侧滑手势关闭小程序
-            // config.enableGestureClose = YES;
+            config.enableGestureClose = configuration[@"enableGestureClose"] ? [configuration[@"enableGestureClose"] boolValue] : YES;
+            // 跳转路径
+            if (configuration[@"redirectPath"]) {
+              config.path = configuration[@"redirectPath"];
+            }
 
             // 需要在主线程中执行
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -188,8 +198,8 @@ RCT_EXPORT_METHOD(closeUniMP:(NSString *)appid resolver:(RCTPromiseResolveBlock)
  * @param configuration 小程序配置信息
  */
 RCT_EXPORT_METHOD(showOrHideUniMP:(NSString *)appid show:(BOOL *)show resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    DCUniMPInstance *instance = [self.uniMPInstance objectForKey:appid];
     if (show) {
-        DCUniMPInstance *instance = [self.uniMPInstance objectForKey:appid];
         [instance showWithCompletion:^(BOOL success, NSError * _Nullable error) {
             if (success) {
                 resolve([NSNumber numberWithBool:YES]);
