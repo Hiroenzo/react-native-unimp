@@ -9,13 +9,11 @@
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "verbatimModuleSyntax": true,
+    "importsNotUsedAsValues": "error",
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
     "lib": [
-      "esnext",
-      "dom"
+      "esnext"
     ],
     "module": "esnext",
     "moduleResolution": "node",
@@ -29,14 +27,6 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "lib",
-    "isolatedModules": true
-  },
-  "include": [
-    "src"
-  ]
+    "target": "esnext"
+  }
 }
