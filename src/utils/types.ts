@@ -5,7 +5,7 @@ export declare interface InitializeProps {
   // 胶囊按钮的标题和标识
   items?: { title: string; key: string }[];
   // 是否显示胶囊按钮
-  capsule: boolean;
+  capsule?: boolean;
   // 胶囊按钮字体大小
   fontSize?: string;
   // 胶囊按钮字体颜色

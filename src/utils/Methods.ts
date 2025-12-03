@@ -43,7 +43,7 @@ export function getAppBasePath(appid?: string): Promise<string> {
     if (!appid) {
       return Promise.reject({ message: 'appid不能为空' });
     }
-    return Unimp.getUniMPRunPathWithAppid(appid);
+    return Unimp.getAppBasePath(appid);
   }
 }
 
