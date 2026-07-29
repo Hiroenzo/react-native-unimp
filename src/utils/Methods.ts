@@ -7,6 +7,7 @@ import type {
   ICapsuleBtnStyleProps,
   IConfigurationProps,
   InitializeProps,
+  UniMPEventData,
 } from './types';
 
 /**
@@ -138,6 +139,25 @@ export async function sendUniMPEvent(
   data: Record<string, any>
 ): Promise<boolean> {
   return Unimp.sendUniMPEvent(appid, eventName, data);
+}
+
+/**
+ * 设置监听小程序发送给宿主的事件
+ */
+export function setOnUniMPEventCallBack(): void {
+  Unimp.setOnUniMPEventCallBack();
+}
+
+/**
+ * 将宿主的处理结果单次回调给小程序
+ * @param callbackId  onEventReceive 事件中携带的回调标识
+ * @param responseData 回调数据
+ */
+export function invokeUniMPEventCallback(
+  callbackId: string,
+  responseData: UniMPEventData
+): Promise<boolean> {
+  return Unimp.invokeUniMPEventCallback(callbackId, responseData);
 }
 
 /**

@@ -6,12 +6,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
@@ -19,12 +21,16 @@ import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.dcloud.feature.sdk.DCSDKInitConfig;
 import io.dcloud.feature.sdk.DCUniMPCapsuleButtonStyle;
@@ -49,6 +55,9 @@ public class UnimpModule extends ReactContextBaseJavaModule {
 
   private static final Map<String, IUniMP> iUniMPMap = new HashMap<>();
   private static boolean isBackgroundMode = false;
+
+  // 缓存小程序发送事件的回调方法
+  private static final ConcurrentHashMap<String, DCUniMPJSCallback> callbackMap = new ConcurrentHashMap<>();
 
   public UnimpModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -234,7 +243,7 @@ public class UnimpModule extends ReactContextBaseJavaModule {
       }
 
       UniMPOpenConfiguration config = new UniMPOpenConfiguration();
-      
+
       // 处理extraData参数
       if (configuration != null && configuration.hasKey("extraData")) {
         ReadableMap extraData = configuration.getMap("extraData");
@@ -257,12 +266,12 @@ public class UnimpModule extends ReactContextBaseJavaModule {
           }
         }
       }
-      
+
       // 处理redirectPath参数 - 小程序页面直达地址
       if (configuration != null && configuration.hasKey("redirectPath") && !configuration.isNull("redirectPath")) {
         config.redirectPath = configuration.getString("redirectPath");
       }
-      
+
       // 处理arguments参数 - 小程序启动参数
       if (configuration != null && configuration.hasKey("arguments") && !configuration.isNull("arguments")) {
         ReadableMap arguments = configuration.getMap("arguments");
@@ -292,17 +301,17 @@ public class UnimpModule extends ReactContextBaseJavaModule {
           config.arguments = argsJson;
         }
       }
-      
+
       // 处理splashView参数 - 自定义启动页
       if (configuration != null && configuration.hasKey("splashClass") && !configuration.isNull("splashClass")) {
         // 注意：splashClass需要是IDCUniMPAppSplashView接口的实现类的完整类名
         // 这里暂时不实现，因为需要具体的类实现
         Log.w(NAME, "splashClass参数暂未实现，需要自定义IDCUniMPAppSplashView实现类");
       }
-      
+
       // 启动小程序
       IUniMP unimp = DCUniMPSDK.getInstance().openUniMP(this.context, appid, config);
-      
+
       if (unimp != null) {
         iUniMPMap.put(appid, unimp);
         promise.resolve(appid);
@@ -472,69 +481,240 @@ public class UnimpModule extends ReactContextBaseJavaModule {
         WritableMap params = new WritableNativeMap();
         params.putString("appid", appid);
         params.putString("event", event);
-        ReadableMap receiveData = objectToReadableMap(data);
-        params.putMap("data", receiveData);
+        if (data == null) {
+          params.putNull("data");
+        } else if (data instanceof String) {
+          params.putString("data", (String) data);
+        } else {
+          params.putMap("data", objectToReadableMap(data));
+        }
+
+        // 如果存在回调函数，生成一个唯一的 callbackId 存起来
+        if (dcUniMPJSCallback != null) {
+          String callbackId = UUID.randomUUID().toString();
+          callbackMap.put(callbackId, dcUniMPJSCallback);
+          params.putString("callbackId", callbackId); // 把 callbackId 一并发给 RN JS
+        }
         sendEvent("onEventReceive", params);
       }
     });
   }
 
+  /**
+   * 暴露给 RN JS 用的单次回调触发方法
+   */
+  @ReactMethod
+  public void invokeUniMPEventCallback(String callbackId, Dynamic responseData, final Promise promise) {
+    if (callbackId == null || callbackId.isEmpty()) {
+      promise.reject(new Exception("callbackId不能为空"));
+      return;
+    }
+
+    try {
+      Object callbackResult;
+      if (responseData == null || responseData.isNull()) {
+        callbackResult = null;
+      } else if (responseData.getType() == ReadableType.String) {
+        callbackResult = responseData.asString();
+      } else if (responseData.getType() == ReadableType.Map) {
+        callbackResult = readableMapToJSONObject(responseData.asMap());
+      } else {
+        promise.reject(new Exception("回调参数仅支持 String 或 JSON Object"));
+        return;
+      }
+
+      DCUniMPJSCallback callback = callbackMap.remove(callbackId); // 取出并移除，防内存泄漏
+      if (callback == null) {
+        promise.reject(new Exception("未找到callbackId对应的小程序回调"));
+        return;
+      }
+
+      callback.invoke(callbackResult);
+      promise.resolve(true);
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+  }
+
+  /**
+   * 将 RN 的 ReadableMap 递归转换为 org.json.JSONObject
+   */
+  private JSONObject readableMapToJSONObject(ReadableMap readableMap) {
+    if (readableMap == null) {
+      return null;
+    }
+
+    JSONObject jsonObject = new JSONObject();
+    ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
+
+    try {
+      while (iterator.hasNextKey()) {
+        String key = iterator.nextKey();
+        ReadableType type = readableMap.getType(key);
+
+        switch (type) {
+          case Null:
+            jsonObject.put(key, JSONObject.NULL);
+            break;
+          case Boolean:
+            jsonObject.put(key, readableMap.getBoolean(key));
+            break;
+          case Number:
+            // 处理整数和浮点数
+            try {
+              jsonObject.put(key, readableMap.getInt(key));
+            } catch (Exception e) {
+              jsonObject.put(key, readableMap.getDouble(key));
+            }
+            break;
+          case String:
+            jsonObject.put(key, readableMap.getString(key));
+            break;
+          case Map:
+            // 递归处理嵌套 Map
+            jsonObject.put(key, readableMapToJSONObject(readableMap.getMap(key)));
+            break;
+          case Array:
+            // 递归处理嵌套 Array
+            jsonObject.put(key, readableArrayToJSONArray(readableMap.getArray(key)));
+            break;
+        }
+      }
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+
+    return jsonObject;
+  }
+
+  /**
+   * 辅助方法：将 RN 的 ReadableArray 递归转换为 org.json.JSONArray
+   */
+  private JSONArray readableArrayToJSONArray(ReadableArray readableArray) {
+    if (readableArray == null) {
+      return null;
+    }
+
+    JSONArray jsonArray = new JSONArray();
+
+    try {
+      for (int i = 0; i < readableArray.size(); i++) {
+        ReadableType type = readableArray.getType(i);
+
+        switch (type) {
+          case Null:
+            jsonArray.put(JSONObject.NULL);
+            break;
+          case Boolean:
+            jsonArray.put(readableArray.getBoolean(i));
+            break;
+          case Number:
+            try {
+              jsonArray.put(readableArray.getInt(i));
+            } catch (Exception e) {
+              jsonArray.put(readableArray.getDouble(i));
+            }
+            break;
+          case String:
+            jsonArray.put(readableArray.getString(i));
+            break;
+          case Map:
+            jsonArray.put(readableMapToJSONObject(readableArray.getMap(i)));
+            break;
+          case Array:
+            jsonArray.put(readableArrayToJSONArray(readableArray.getArray(i)));
+            break;
+        }
+      }
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+
+    return jsonArray;
+  }
+
   private static ReadableMap objectToReadableMap(Object object) {
     WritableMap map = Arguments.createMap();
 
-    if (object instanceof Map<?, ?> objMap) {
+    if (object instanceof JSONObject) {
+      JSONObject jsonObject = (JSONObject) object;
+      java.util.Iterator<String> keys = jsonObject.keys();
+      while (keys.hasNext()) {
+        String key = keys.next();
+        putObjectToMap(map, key, jsonObject.opt(key));
+      }
+    } else if (object instanceof Map) {
+      Map<?, ?> objMap = (Map<?, ?>) object;
       for (Map.Entry<?, ?> entry : objMap.entrySet()) {
         String key = entry.getKey().toString();
-        Object value = entry.getValue();
-
-        if (value instanceof String) {
-          map.putString(key, (String) value);
-        } else if (value instanceof Integer) {
-          map.putInt(key, (Integer) value);
-        } else if (value instanceof Double) {
-          map.putDouble(key, (Double) value);
-        } else if (value instanceof Boolean) {
-          map.putBoolean(key, (Boolean) value);
-        } else if (value instanceof Map) {
-          map.putMap(key, objectToReadableMap(value));
-        } else if (value instanceof List) {
-          map.putArray(key, objectToReadableArray((List<?>) value));
-        } else if (value == null) {
-          map.putNull(key);
-        } else {
-          throw new IllegalArgumentException("Unsupported value type: " + value.getClass().getName());
-        }
+        putObjectToMap(map, key, entry.getValue());
       }
     } else {
-      throw new IllegalArgumentException("Input object is not a Map.");
+      throw new IllegalArgumentException("Input object is not a JSON Object.");
     }
 
     return map;
   }
 
-  public static ReadableArray objectToReadableArray(List<?> list) {
+  private static void putObjectToMap(WritableMap map, String key, Object value) {
+    if (value == null || value == JSONObject.NULL) {
+      map.putNull(key);
+    } else if (value instanceof String) {
+      map.putString(key, (String) value);
+    } else if (value instanceof Integer) {
+      map.putInt(key, (Integer) value);
+    } else if (value instanceof Number) {
+      map.putDouble(key, ((Number) value).doubleValue());
+    } else if (value instanceof Boolean) {
+      map.putBoolean(key, (Boolean) value);
+    } else if (value instanceof JSONObject || value instanceof Map) {
+      map.putMap(key, objectToReadableMap(value));
+    } else if (value instanceof JSONArray) {
+      map.putArray(key, objectToReadableArray((JSONArray) value));
+    } else if (value instanceof List) {
+      map.putArray(key, objectToReadableArray((List<?>) value));
+    } else {
+      throw new IllegalArgumentException("Unsupported value type: " + value.getClass().getName());
+    }
+  }
+
+  private static ReadableArray objectToReadableArray(JSONArray jsonArray) {
+    WritableArray array = Arguments.createArray();
+    for (int i = 0; i < jsonArray.length(); i++) {
+      putObjectToArray(array, jsonArray.opt(i));
+    }
+    return array;
+  }
+
+  private static ReadableArray objectToReadableArray(List<?> list) {
     WritableArray array = Arguments.createArray();
 
     for (Object item : list) {
-      if (item instanceof String) {
-        array.pushString((String) item);
-      } else if (item instanceof Integer) {
-        array.pushInt((Integer) item);
-      } else if (item instanceof Double) {
-        array.pushDouble((Double) item);
-      } else if (item instanceof Boolean) {
-        array.pushBoolean((Boolean) item);
-      } else if (item instanceof Map) {
-        array.pushMap(objectToReadableMap(item));
-      } else if (item instanceof List) {
-        array.pushArray(objectToReadableArray((List<?>) item));
-      } else if (item == null) {
-        array.pushNull();
-      } else {
-        throw new IllegalArgumentException("Unsupported array element type: " + item.getClass().getName());
-      }
+      putObjectToArray(array, item);
     }
 
     return array;
+  }
+
+  private static void putObjectToArray(WritableArray array, Object item) {
+    if (item == null || item == JSONObject.NULL) {
+      array.pushNull();
+    } else if (item instanceof String) {
+      array.pushString((String) item);
+    } else if (item instanceof Integer) {
+      array.pushInt((Integer) item);
+    } else if (item instanceof Number) {
+      array.pushDouble(((Number) item).doubleValue());
+    } else if (item instanceof Boolean) {
+      array.pushBoolean((Boolean) item);
+    } else if (item instanceof JSONObject || item instanceof Map) {
+      array.pushMap(objectToReadableMap(item));
+    } else if (item instanceof JSONArray) {
+      array.pushArray(objectToReadableArray((JSONArray) item));
+    } else if (item instanceof List) {
+      array.pushArray(objectToReadableArray((List<?>) item));
+    } else {
+      throw new IllegalArgumentException("Unsupported array element type: " + item.getClass().getName());
+    }
   }
 }

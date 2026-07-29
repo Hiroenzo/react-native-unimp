@@ -5,12 +5,21 @@
 
 @implementation Unimp {
     bool hasListeners;
+    NSMutableDictionary<NSString *, id> *_uniMPEventCallbacks;
 }
 
 RCT_EXPORT_MODULE(Unimp);
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _uniMPEventCallbacks = [NSMutableDictionary dictionary];
+    }
+    return self;
+}
+
 - (NSArray<NSString *> *)supportedEvents {
-  return @[@"onError"];
+  return @[@"onError", @"onEventReceive"];
 }
 
 /**
@@ -248,6 +257,68 @@ RCT_EXPORT_METHOD(getCurrentPageUrl:(NSString *)appid resolver:(RCTPromiseResolv
 RCT_EXPORT_METHOD(sendUniMPEvent:(NSString *)appid eventName:(NSString *)eventName data:(NSDictionary *)data resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     [[self.uniMPInstance objectForKey:appid] sendUniMPEvent:eventName data:data];
     resolve([NSNumber numberWithBool:YES]);
+}
+
+/**
+ * 设置监听小程序发送给宿主的事件
+ */
+RCT_EXPORT_METHOD(setOnUniMPEventCallBack) {
+    [DCUniMPSDKEngine setDelegate:self];
+}
+
+/**
+ * 监听小程序向宿主发送的事件
+ * iOS SDK 不提供 appid；如业务需要，可由小程序通过 data 传递。
+ */
+- (void)onUniMPEventReceive:(NSString *)event data:(id)data callback:(DCUniMPKeepAliveCallback)callback {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    params[@"event"] = event ?: @"";
+    params[@"data"] = data ?: [NSNull null];
+
+    if (callback) {
+        NSString *callbackId = [NSUUID UUID].UUIDString;
+        @synchronized (_uniMPEventCallbacks) {
+            _uniMPEventCallbacks[callbackId] = [callback copy];
+        }
+        params[@"callbackId"] = callbackId;
+    }
+
+    [self sendEventWithName:@"onEventReceive" body:params];
+}
+
+/**
+ * 将 RN 的处理结果单次回调给小程序
+ */
+RCT_EXPORT_METHOD(invokeUniMPEventCallback:(NSString *)callbackId responseData:(id)responseData resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    @try {
+        if (callbackId.length == 0) {
+            reject(@"-1", @"callbackId不能为空", nil);
+            return;
+        }
+
+        if (responseData != nil &&
+            ![responseData isKindOfClass:[NSString class]] &&
+            ![responseData isKindOfClass:[NSDictionary class]]) {
+            reject(@"-1", @"回调参数仅支持 NSString 或 NSDictionary", nil);
+            return;
+        }
+
+        DCUniMPKeepAliveCallback callback = nil;
+        @synchronized (_uniMPEventCallbacks) {
+            callback = _uniMPEventCallbacks[callbackId];
+            [_uniMPEventCallbacks removeObjectForKey:callbackId];
+        }
+
+        if (!callback) {
+            reject(@"-1", @"未找到callbackId对应的小程序回调", nil);
+            return;
+        }
+
+        callback(responseData, NO);
+        resolve([NSNumber numberWithBool:YES]);
+    } @catch (NSException *exception) {
+        reject(@"-1", exception.reason, nil);
+    }
 }
 
 @end

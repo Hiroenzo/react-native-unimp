@@ -38,6 +38,88 @@ Unimp.initialize(
   .catch((e) => console.log(`[小程序初始化]: 失败：${e.message}`));
 ```
 
+### 接收小程序事件并回调
+
+`setOnUniMPEventCallBack()` 依赖已初始化的 UniMP SDK，必须等待 `initialize()`
+成功后调用，否则原生事件监听不会生效。`UnimpEventEmitter().addListener()` 是 RN
+事件订阅，可以提前创建。
+
+```ts
+import {
+  IUniMPEventReceiveProps,
+  initialize,
+  invokeUniMPEventCallback,
+  setOnUniMPEventCallBack,
+  UniMPEvent,
+  UnimpEventEmitter,
+} from 'react-native-unimp';
+
+async function subscribeUniMPEvents() {
+  // 1. RN 事件订阅可以在 SDK 初始化前创建
+  const subscription = UnimpEventEmitter().addListener(
+    UniMPEvent.onEventReceive,
+    async ({ appid, event, data, callbackId }: IUniMPEventReceiveProps) => {
+      console.log('收到小程序事件：', { appid, event, data });
+
+      // 小程序传入 callback 时才会存在 callbackId
+      if (callbackId) {
+        await invokeUniMPEventCallback(callbackId, {
+          message: '宿主已收到事件',
+        });
+      }
+    }
+  );
+
+  // 2. 初始化 UniMP SDK
+  await initialize(
+    { isEnableBackground: false, capsule: true },
+    { backgroundColor: '#1991FB' }
+  );
+
+  // 3. 必须在初始化成功后注册原生事件监听
+  setOnUniMPEventCallBack();
+
+  // 调用方应在页面或应用作用域销毁时执行 subscription.remove()
+  return subscription;
+}
+```
+
+事件参数说明：
+
+| 属性 | 类型 | 说明 |
+| --- | --- | --- |
+| `event` | `string` | 小程序发送的事件名称 |
+| `data` | `string \| Record<string, unknown>` | 小程序携带的数据 |
+| `callbackId` | `string \| undefined` | 小程序传入 callback 时生成，用于向对应 callback 回传结果 |
+| `appid` | `string \| undefined` | Android 提供；iOS SDK 不提供 |
+
+当前 `UniMPEvent` 支持的事件：
+
+| 枚举 | 事件名称 | 支持平台 | 触发时机 |
+| --- | --- | --- | --- |
+| `UniMPEvent.onEventReceive` | `onEventReceive` | Android / iOS | 小程序调用 `uni.sendNativeEvent()` 向宿主发送事件 |
+| `UniMPEvent.onClose` | `onClose` | Android | 小程序关闭 |
+| `UniMPEvent.onMenuButtonClick` | `onMenuButtonClick` | Android | 用户点击小程序自定义菜单项 |
+| `UniMPEvent.onCapsuleCloseButtonClick` | `onCapsuleCloseButtonClick` | Android | 用户点击胶囊关闭按钮 |
+
+`onEventReceive` 需要在初始化成功后调用 `setOnUniMPEventCallBack()`。其他 Android
+事件同样需要在初始化成功后注册对应的原生 callback：
+
+| 事件 | Android 原生注册方法 |
+| --- | --- |
+| `onClose` | `setUniMPOnCloseCallBack()` |
+| `onMenuButtonClick` | `setDefMenuButtonClickCallBack()` |
+| `onCapsuleCloseButtonClick` | `setCapsuleCloseButtonClickCallBack()` |
+
+注意事项：
+
+- `invokeUniMPEventCallback()` 返回 `Promise<boolean>`。当前是单次回调，调用成功后对应的 `callbackId` 会失效；参数错误或找不到回调时 Promise 会 reject。
+- 如果小程序没有传入 callback，事件参数中不会包含 `callbackId`，宿主无需回调。
+- iOS 如需识别事件所属的 `appid`，可由 uni-app 调用方将其放入 `data`。
+- `setOnUniMPEventCallBack()` 必须在 `initialize()` 成功后调用；每次 SDK 初始化流程只需调用一次。
+- `UnimpEventEmitter().addListener()` 不受初始化顺序限制，但重复订阅会导致业务回调被重复执行。
+- 页面或应用作用域销毁时调用 `subscription.remove()`，避免遗留 JS 监听。
+
 ## 配置
 ### Android配置
 
@@ -323,4 +405,5 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 | 10 | showOrHideUniMP   | appid: string, show: boolean                                     | Android / iOS | 当前小程序显示到前台/退到后台                                   |
 | 11 | sendUniMPEvent   | appid: string, eventName: string, data: Record<string, any>                         | Android / iOS | 宿主主动触发事件到正在运行的小程序                                   |
 | 12 | getCurrentPageUrl   | appid: string | Android / iOS | 获取运行时uni小程序的当前页面url 可用于页面直达等操作的地址 |
-
+| 13 | setOnUniMPEventCallBack | / | Android / iOS | SDK 初始化完成后，设置监听小程序向宿主发送的事件 |
+| 14 | invokeUniMPEventCallback | callbackId: string, responseData: UniMPEventData | Android / iOS | 将宿主处理结果单次回调给小程序，返回 `Promise<boolean>` |

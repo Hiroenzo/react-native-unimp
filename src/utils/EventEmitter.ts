@@ -1,5 +1,7 @@
+export { UnimpEventEmitter } from './NativeUniMP';
+
 export enum UniMPEvent {
-  onCapsuleCloseButtonClick = 'OnCapsuleCloseButtonClick',
+  onCapsuleCloseButtonClick = 'onCapsuleCloseButtonClick',
   onClose = 'onClose',
   onMenuButtonClick = 'onMenuButtonClick',
   onEventReceive = 'onEventReceive',

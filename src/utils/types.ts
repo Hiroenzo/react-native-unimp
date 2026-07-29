@@ -70,3 +70,22 @@ export declare interface IMenuClickCallBackProps {
   // 小程序菜单按钮id
   buttonid: string;
 }
+
+/**
+ * 小程序向宿主发送的事件数据及宿主回调数据
+ */
+export type UniMPEventData = string | Record<string, unknown>;
+
+/**
+ * 小程序向宿主发送事件时，宿主收到的参数
+ */
+export declare interface IUniMPEventReceiveProps {
+  // Android SDK 提供；iOS 如有需要可由小程序在 data 中传递
+  appid?: string;
+  // 事件名称
+  event: string;
+  // 事件携带参数
+  data: UniMPEventData;
+  // 用于将宿主处理结果回传给小程序；小程序未传回调时不存在
+  callbackId?: string;
+}
