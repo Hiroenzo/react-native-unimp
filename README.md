@@ -2,12 +2,65 @@
 
 ![NPM Downloads](https://img.shields.io/npm/d18m/react-native-unimp?style=for-the-badge&logo=npm&link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Freact-native-unimp)
 ![Node Current](https://img.shields.io/node/v/react-native-unimp?style=for-the-badge&logo=nodedotjs)
+![React Native](https://img.shields.io/badge/React_Native-0.71%2B-61DAFB?style=for-the-badge&logo=react)
+![New Architecture](https://img.shields.io/badge/New_Architecture-TurboModules-61DAFB?style=for-the-badge&logo=react)
+![Expo](https://img.shields.io/badge/Expo-Config_Plugin-000020?style=for-the-badge&logo=expo)
+![Android](https://img.shields.io/badge/Android-Kotlin-7F52FF?style=for-the-badge&logo=kotlin)
+![iOS](https://img.shields.io/badge/iOS-Swift-F05138?style=for-the-badge&logo=swift)
 
 > 集成uni小程序SDK，支持**Android**和**iOS**，目前只集成了基础模块，其他原生功能依赖库需要自行集成。
+>
+> v2.0.0 全面支持 React Native **新架构（TurboModules）** 与 **Expo Config Plugin**，Android 端已使用 **Kotlin**、iOS 端已使用 **Swift** 重写，同时通过 interop 层保持对旧架构的向后兼容。
 
 ## SDK 版本
 - `Android`已更新至2025年11月11日发布的 **SDK 5.14 版本**
 - `ios`版本为 **SDK 5.15 版本**
+
+## v2.0.0 破坏性变更
+
+v2.0.0 是一次重大重构版本，请注意以下破坏性变更：
+
+- **最低 React Native 版本提升至 0.71+**：新架构基于 Codegen 与 TurboModules，要求 RN 0.71 及以上版本。
+- **Android 原生代码由 Java 重写为 Kotlin**：旧版本基于 Java 的自定义原生模块修改方式不再适用，请参考新的 Kotlin 实现。
+- **iOS 原生代码由 Objective-C 重写为 Swift**：核心逻辑迁移至 Swift，并通过 Obj-C++ 桥接层对接 TurboModule 与 UniMP SDK。
+- **新增 Codegen 规范文件**：`Codegen` 已纳入构建流程，TurboModule 接口由 TypeScript spec 自动生成原生代码。
+- **Expo 支持**：通过 `app.plugin.js` Config Plugin 接入，Expo 项目无需手动修改原生代码。
+
+> 如果你的项目仍使用旧架构（Paper），本库会自动通过 interop 层降级运行，无需额外配置。
+
+## 新架构支持 (New Architecture)
+
+v2.0.0 已完整适配 React Native 新架构（New Architecture），主要特性如下：
+
+### TurboModules
+
+本库通过 [Codegen](https://reactnative.dev/docs/the-new-architecture/pillars-codegen) 规范文件定义原生模块接口，在构建时自动生成 C++ / Java(Kotlin) / Objective-C++ 胶水代码，实现 TurboModule 通信：
+
+- **接口定义**：使用 TypeScript 编写 spec 文件，由 Codegen 生成各平台的原生类型绑定。
+- **Android（Kotlin）**：`UnimpModule.kt` 实现 TurboModule 接口，直接对接 UniMP Android SDK。
+- **iOS（Swift + Obj-C++）**：`Unimp.swift` 为 Swift 核心，`UnimpModule.mm` 为 Obj-C++ TurboModule 桥接层，负责把 JSI/TurboModule 调用转发到 Swift 实现。
+
+### 向后兼容（Interop Layer）
+
+对于尚未启用新架构的项目，本库通过 React Native 提供的 interop layer 自动降级为传统 Bridge 模式运行，无需修改任何业务代码：
+
+- 启用新架构时走 TurboModule（JSI 同步调用，性能更优）。
+- 未启用新架构时自动回退到 Legacy Bridge 异步通信。
+- 业务侧 `import * as Unimp from 'react-native-unimp'` 的调用方式完全一致，无需针对架构差异做适配。
+
+### 原生实现结构
+
+```
+android/src/main/java/com/unimp/
+  ├── UnimpModule.kt      # Kotlin TurboModule 实现
+  └── UnimpPackage.kt     # Android 包注册
+
+ios/
+  ├── Unimp.swift          # Swift 核心实现
+  ├── UnimpModule.mm       # Obj-C++ TurboModule 桥接层
+  ├── UnimpSDKBridge.h     # Obj-C++ SDK 桥接头文件
+  └── UnimpSDKBridge.mm    # Obj-C++ SDK 桥接实现（对接 DCUniMP SDK）
+```
 
 ## 示例
 
@@ -15,9 +68,85 @@
 
 ## 安装
 
+### Bare React Native
+
 ```sh
 npm install react-native-unimp
 ```
+
+iOS 安装依赖：
+
+```sh
+cd ios && pod install
+```
+
+Android 需要为 UniMP SDK 添加 maven 仓库地址，详见下方 [Android配置](#android配置)。
+
+### Expo
+
+Expo 项目同样通过 npm 安装，随后在 `app.json` / `app.config.js` 中注册 Config Plugin，无需手动执行 `pod install` 或修改原生文件：
+
+```sh
+npm install react-native-unimp
+```
+
+详细的 Expo 配置方式见 [Expo 集成](#expo-集成)。
+
+## Expo 集成
+
+v2.0.0 起提供 `app.plugin.js` Config Plugin，Expo 项目（含 Expo managed workflow 与裸 RN + Expo 工作流）可通过插件自动完成绝大部分原生配置。
+
+### 1. 注册 Config Plugin
+
+在 `app.json` 中将 `react-native-unimp` 添加到 `plugins` 数组，并按需传入配置参数：
+
+```json
+// app.json
+{
+  "plugins": [
+    [
+      "react-native-unimp",
+      {
+        "android": {
+          "mavenRepositoryUrl": "https://your-maven-repo.com"
+        },
+        "ios": {
+          "debug": true
+        }
+      }
+    ]
+  ]
+}
+```
+
+配置参数说明：
+
+| 平台 | 参数 | 类型 | 说明 |
+| --- | --- | --- | --- |
+| `android` | `mavenRepositoryUrl` | `string` | UniMP Android SDK 所在的 maven 仓库地址，插件会自动写入到 `build.gradle` |
+| `ios` | `debug` | `boolean` | 是否在控制台输出 JS log（对应 SDK 的 `debug` 参数），默认 `false` |
+
+### 2. 生成原生项目并构建
+
+```sh
+# 预构建（生成 ios / android 原生工程）
+npx expo prebuild
+
+# 运行
+npx expo run:ios
+npx expo run:android
+```
+
+### 3. 导入小程序应用资源
+
+Config Plugin 会自动处理 Gradle / Pod 等构建配置，但小程序的 wgt 资源仍需按平台手动导入：
+
+- **Android**：将 wgt 资源解压到 `android/app/src/main/assets/apps/__UNI__XXXX/www` 目录。
+- **iOS**：将 wgt 包放入 `apps` 文件夹并添加到 Xcode 工程中。
+
+具体导入方式与 Bare RN 一致，详见下方 [Android配置](#android配置) 与 [iOS配置](#ios配置) 中的「导入小程序应用资源」小节。
+
+> Config Plugin 已自动完成以下配置，Expo 项目**无需手动重复操作**：Android 的 maven 仓库、`aaptOptions`、Pod 依赖；iOS 的 SDK 引擎初始化、生命周期方法注入。
 
 ## 使用示例
 
@@ -121,7 +250,12 @@ async function subscribeUniMPEvents() {
 - 页面或应用作用域销毁时调用 `subscription.remove()`，避免遗留 JS 监听。
 
 ## 配置
+
+> **Expo 项目提示**：如果你使用 Expo Config Plugin 接入，下面 Android / iOS 的构建级配置（maven 仓库、Gradle `aaptOptions`、Pod 依赖、iOS SDK 引擎初始化及生命周期方法等）已由插件自动完成，通常**无需手动配置**。以下内容主要面向 Bare React Native 项目，或需要自定义原生配置的场景。
+
 ### Android配置
+
+> v2.0.0 起 Android 原生模块已由 Java 重写为 **Kotlin**（`UnimpModule.kt` / `UnimpPackage.kt`）。自定义原生扩展请基于 Kotlin 代码修改，旧的 Java 实现不再维护。
 
 #### 1. 集成SDK文件
 
@@ -184,6 +318,8 @@ android {
 检查 `minSdkVersion` 取值范围 `19~22` 注意 `>=23` 一定要在原生项目主app的`AndroidManifest.xml` 中的 `application` 节点配置 `android:extractNativeLibs="true"`
 
 ### iOS配置
+
+> v2.0.0 起 iOS 核心逻辑已由 Objective-C 重写为 **Swift**（`Unimp.swift`），并通过 Obj-C++ 桥接层（`UnimpModule.mm` / `UnimpSDKBridge.h/.mm`）对接 TurboModule 与 DCUniMP SDK。Swift 与 Obj-C++ 之间的互操作由桥接层处理，业务侧调用方式保持不变。
 
 #### 1. 安装Git LFS
 
@@ -341,7 +477,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
   /// Called when the application is about to enter the foreground from the background state.
   func applicationWillEnterForeground(_ application: UIApplication) {
-      // Call the DCUniMPSDK method corresponding to entering foreground
+      // Call the DCUniMPSDKEngine method corresponding to entering foreground
       DCUniMPSDKEngine.applicationWillEnterForeground(application)
   }
 

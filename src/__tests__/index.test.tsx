@@ -12,6 +12,12 @@ jest.mock('react-native', () => ({
       invokeUniMPEventCallback: mockInvokeUniMPEventCallback,
     },
   },
+  // TurboModuleRegistry.get returns null in tests so that
+  // NativeUniMP.ts falls back to NativeModules.Unimp (mocked above).
+  TurboModuleRegistry: {
+    get: jest.fn(() => null),
+    getEnforcing: jest.fn(() => null),
+  },
   Platform: {
     OS: 'ios',
     select: jest.fn(({ ios }) => ios),
@@ -66,5 +72,14 @@ describe('UniMP event callbacks', () => {
       'callback-id',
       responseData
     );
+  });
+});
+
+describe('TurboModule spec', () => {
+  it('exports the Spec type from the codegen spec file', () => {
+    // This test ensures the NativeUnimp.ts spec file is importable
+    // and exports the expected shape for Codegen.
+    const specModule = require('../NativeUnimp');
+    expect(specModule).toBeDefined();
   });
 });

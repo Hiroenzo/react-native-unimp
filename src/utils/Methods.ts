@@ -19,7 +19,7 @@ export function initialize(
   params: InitializeProps,
   capsuleBtnStyle?: ICapsuleBtnStyleProps
 ): Promise<boolean> {
-  return Unimp.initialize(params, capsuleBtnStyle);
+  return Unimp.initialize(params, capsuleBtnStyle ?? {});
 }
 
 /**
@@ -39,7 +39,9 @@ export function isInitialize(): Promise<boolean> {
  */
 export function getAppBasePath(appid?: string): Promise<string> {
   if (Platform.OS === 'android') {
-    return Unimp.getAppBasePath();
+    // Android ignores the appid parameter; pass empty string to satisfy
+    // the TurboModule spec signature.
+    return Unimp.getAppBasePath(appid ?? '');
   } else {
     if (!appid) {
       return Promise.reject({ message: 'appid不能为空' });
@@ -59,7 +61,7 @@ export function releaseWgtToRunPath(
   wgtPath?: string | null,
   password?: string
 ): Promise<any> {
-  return Unimp.releaseWgtToRunPath(appid, wgtPath, password);
+  return Unimp.releaseWgtToRunPath(appid, wgtPath ?? '', password ?? '');
 }
 
 /**
@@ -90,7 +92,7 @@ export async function openUniMP(
 ): Promise<any> {
   try {
     if (Platform.OS === 'android') {
-      return Unimp.openUniMP(appid, configuration);
+      return Unimp.openUniMP(appid, configuration ?? {});
     } else {
       const isExists = await isExistsApp(appid);
       if (!isExists) {
@@ -100,7 +102,7 @@ export async function openUniMP(
         }
         await releaseWgtToRunPath(appid, wgtPath);
       }
-      return Unimp.openUniMP(appid, configuration);
+      return Unimp.openUniMP(appid, configuration ?? {});
     }
   } catch (error) {
     return Promise.reject(error);
@@ -164,10 +166,15 @@ export function invokeUniMPEventCallback(
  * 获取uni小程序版本信息
  * @param appid uni小程序应用id
  */
-export function getAppVersionInfo(
+export async function getAppVersionInfo(
   appid: string
 ): Promise<IAppVersionInfoProps> {
-  return Unimp.getAppVersionInfo(appid);
+  const result = await Unimp.getAppVersionInfo(appid);
+  // Native modules return a JSON string; parse it into the expected shape.
+  if (typeof result === 'string') {
+    return JSON.parse(result);
+  }
+  return result;
 }
 
 /**

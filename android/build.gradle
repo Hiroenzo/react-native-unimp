@@ -6,6 +6,7 @@ buildscript {
 
   dependencies {
     classpath 'com.android.tools.build:gradle:8.7.3'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${project.properties['Unimp_kotlinVersion'] ?: '1.9.0'}"
   }
 }
 
@@ -14,7 +15,7 @@ def isNewArchitectureEnabled() {
 }
 
 apply plugin: "com.android.library"
-
+apply plugin: "kotlin-android"
 
 def appProject = rootProject.allprojects.find { it.plugins.hasPlugin("com.android.application") }
 
@@ -53,16 +54,21 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+
+  sourceSets {
+    main {
+      java.srcDirs += "src/main/kotlin"
+    }
+  }
 }
 
 repositories {
   mavenCentral()
   google()
-  // flatDir {
-  //   dirs "libs"
-  // }
 }
-
 
 dependencies {
   // For < 0.71, this will be from the local maven repo
@@ -70,19 +76,23 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
 
-  // uni-app
-  //导入SDK相关依赖jar、aar
+  // Kotlin standard library
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:${project.properties['Unimp_kotlinVersion'] ?: '1.9.0'}"
+
+  // uni-app SDK
   implementation(group: 'com.uniapp', name: 'android-gif-drawable', version: '5.14', ext: 'aar')
   implementation(group: 'com.uniapp', name: 'base_oaid_sdk', version: '5.14', ext: 'aar')
   implementation(group: 'com.uniapp', name: 'breakpad-build', version: '5.14', ext: 'aar')
   implementation(group: 'com.uniapp', name: 'uniapp-v8', version: '5.14', ext: 'aar')
   implementation(group: 'com.uniapp', name: 'uniMPSDK-V2', version: '5.14', ext: 'aar')
-  //必须添加的依赖
-  implementation "androidx.recyclerview:recyclerview:1.0.0" // android 自带recyclerview支持
-  implementation "androidx.legacy:legacy-support-v4:1.0.0" // androidx support支持
-  implementation "androidx.appcompat:appcompat:1.0.0" // androidx appcompat支持
-  implementation "com.alibaba:fastjson:1.2.83" // fastjson功能需要
-  // 图片加载需要
+
+  // Required dependencies
+  implementation "androidx.recyclerview:recyclerview:1.0.0"
+  implementation "androidx.legacy:legacy-support-v4:1.0.0"
+  implementation "androidx.appcompat:appcompat:1.0.0"
+  implementation "com.alibaba:fastjson:1.2.83"
+
+  // Image loading
   implementation "com.facebook.fresco:fresco:2.5.0"
   implementation "com.facebook.fresco:animated-gif:2.5.0"
   implementation "com.facebook.fresco:webpsupport:2.5.0"
@@ -93,9 +103,9 @@ dependencies {
 
   implementation "com.squareup.okhttp3:okhttp:3.7.0"
   implementation "com.squareup.okio:okio:1.8.0"
-  // 重要：更新版本至1.5.0
-  implementation 'androidx.webkit:webkit:1.5.0' // 3.6.15版本之后，用来支持暗黑模式
-  // 重要：避免部分设备可能卡死的问题
+
+  // Dark mode support
+  implementation 'androidx.webkit:webkit:1.5.0'
   annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 }
 

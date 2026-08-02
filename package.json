@@ -1,7 +1,7 @@
 {
   "name": "react-native-unimp",
-  "version": "1.2.1",
-  "description": "ReactNative集成uni-app小程序SDK",
+  "version": "2.0.0",
+  "description": "ReactNative集成uni-app小程序SDK，支持新架构、Expo、Kotlin和Swift",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/index.d.ts",
@@ -24,6 +24,8 @@
     "android",
     "ios",
     "cpp",
+    "plugin",
+    "app.plugin.js",
     "*.podspec",
     "!lib/typescript/example",
     "!ios/build",
@@ -32,6 +34,8 @@
     "!android/gradlew",
     "!android/gradlew.bat",
     "!android/local.properties",
+    "!plugin/build",
+    "!plugin/node_modules",
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
@@ -41,7 +45,8 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "prepack": "bob build",
+    "prepack": "bob build && npm run build:plugin",
+    "build:plugin": "tsc -p plugin/tsconfig.json",
     "release": "release-it",
     "example": "yarn --cwd example",
     "bootstrap": "yarn install",
@@ -49,8 +54,14 @@
   },
   "keywords": [
     "react-native",
+    "react-native-new-architecture",
+    "turbo-module",
+    "expo",
+    "expo-config-plugin",
     "ios",
     "android",
+    "kotlin",
+    "swift",
     "uni",
     "unimp",
     "uniapp"
@@ -68,11 +79,12 @@
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.2",
     "@evilmartians/lefthook": "^1.2.2",
+    "@expo/config-plugins": "^8.0.0",
     "@react-native-community/eslint-config": "^3.0.2",
+    "@react-native/jest-preset": "^0.86.2",
     "@release-it/conventional-changelog": "^5.0.0",
     "@types/jest": "^28.1.2",
-    "@types/react": "16.14.1",
-    "@types/react-native": "0.63.4",
+    "@types/react": "18.2.0",
     "commitlint": "^17.0.2",
     "del-cli": "^5.0.0",
     "eslint": "^8.4.1",
@@ -81,24 +93,23 @@
     "jest": "^28.1.1",
     "pod-install": "^0.1.0",
     "prettier": "^2.0.5",
-    "react": ">=16.13.1",
-    "react-native": ">=0.63.4",
+    "react": ">=18.0.0",
+    "react-native": ">=0.71.0",
     "react-native-builder-bob": "^0.20.0",
     "release-it": "^15.0.0",
-    "typescript": "^4.5.2"
+    "typescript": "^5.0.0"
   },
   "resolutions": {
-    "@types/react": "17.0.21"
+    "@types/react": "18.2.0"
   },
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
   },
   "engines": {
-    "node": ">= 14.0.0"
+    "node": ">= 16.0.0"
   },
   "jest": {
-    "preset": "react-native",
     "modulePathIgnorePatterns": [
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
@@ -147,7 +158,8 @@
   },
   "eslintIgnore": [
     "node_modules/",
-    "lib/"
+    "lib/",
+    "plugin/build/"
   ],
   "prettier": {
     "quoteProps": "consistent",
@@ -169,6 +181,5 @@
         }
       ]
     ]
-  },
-  "dependencies": {}
+  }
 }

@@ -10,11 +10,34 @@ Pod::Spec.new do |s|
   s.license      = package["license"]
   s.authors      = package["author"]
 
-  s.platforms    = { :ios => "11.0" }
+  s.platforms    = { :ios => "13.0" }
   s.source       = { :git => "https://github.com/Hiroenzo/react-native-unimp.git", :tag => "#{s.version}" }
 
-  s.source_files = "ios/**/*.{h,m,mm}"
+  # Source files – includes Swift, Obj-C++, and headers
+  s.source_files = "ios/**/*.{h,m,mm,swift}"
+
+  # Preserve the DCUniMP assets directory
+  s.resource_bundles = {
+    "react-native-unimp" => ["ios/**/*.xcdatamodeld", "ios/**/*.xib", "ios/**/*.storyboard"]
+  }
+
+  # Swift support
+  s.pod_target_xcconfig = {
+    "DEFINES_MODULE" => "YES",
+    "SWIFT_VERSION" => "5.0",
+    "SWIFT_INSTALL_OBJC_HEADER" => "YES"
+  }
 
   s.dependency "React"
+  s.dependency "React-Core"
   s.dependency 'unimp/Core'
+
+  # Codegen configuration for the New Architecture (TurboModules).
+  # When the host app enables the New Architecture, React Native's
+  # codegen CLI reads this hash to generate the native spec files.
+  s.codegenconfig = {
+    "name" => "Unimp",
+    "type" => "modules",
+    "jsSrcsDir" => "src"
+  }
 end
