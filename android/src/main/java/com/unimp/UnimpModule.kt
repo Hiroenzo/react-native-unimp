@@ -69,7 +69,7 @@ class UnimpModule(private val context: ReactApplicationContext) :
         val items = params.getArray("items")
         if (items != null && items.size() != 0) {
             for (i in 1 until items.size()) {
-                val item = items.getMap(i)
+                val item = items.getMap(i) ?: continue
                 sheetItems.add(MenuActionSheetItem(item.getString("title"), item.getString("key")))
             }
         }
@@ -77,16 +77,16 @@ class UnimpModule(private val context: ReactApplicationContext) :
         val style = DCUniMPCapsuleButtonStyle()
         if (btnStyle != null) {
             if (btnStyle.hasKey("backgroundColor") && !btnStyle.isNull("backgroundColor")) {
-                style.backgroundColor = btnStyle.getString("backgroundColor")
+                style.setBackgroundColor(btnStyle.getString("backgroundColor"))
             }
             if (btnStyle.hasKey("textColor") && !btnStyle.isNull("textColor")) {
-                style.textColor = btnStyle.getString("textColor")
+                style.setTextColor(btnStyle.getString("textColor"))
             }
             if (btnStyle.hasKey("borderColor") && !btnStyle.isNull("borderColor")) {
-                style.borderColor = btnStyle.getString("borderColor")
+                style.setBorderColor(btnStyle.getString("borderColor"))
             }
             if (btnStyle.hasKey("highlightColor") && !btnStyle.isNull("highlightColor")) {
-                style.highlightColor = btnStyle.getString("highlightColor")
+                style.setHighlightColor(btnStyle.getString("highlightColor"))
             }
         }
 
@@ -205,10 +205,10 @@ class UnimpModule(private val context: ReactApplicationContext) :
                 while (iterator.hasNextKey()) {
                     val key = iterator.nextKey()
                     when (extraData.getType(key)) {
-                        ReadableType.Boolean -> config.extraData[key] = extraData.getBoolean(key)
-                        ReadableType.String -> config.extraData[key] = extraData.getString(key)
-                        ReadableType.Map -> config.extraData[key] = extraData.getMap(key)
-                        ReadableType.Array -> config.extraData[key] = extraData.getArray(key)
+                        ReadableType.Boolean -> config.extraData.put(key, extraData.getBoolean(key))
+                        ReadableType.String -> config.extraData.put(key, extraData.getString(key))
+                        ReadableType.Map -> config.extraData.put(key, extraData.getMap(key))
+                        ReadableType.Array -> config.extraData.put(key, extraData.getArray(key))
                         else -> {}
                     }
                 }
