@@ -64,7 +64,7 @@ ios/
 
 ## 示例
 
-完整示例可以查看 [react-native-unimp-example](https://github.com/Hiroenzo/react-native-unimp-example)
+完整示例可以查看 [react-native-unimp-example](https://github.com/isB1ar/react-native-unimp-example)
 
 ## 安装
 

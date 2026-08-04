@@ -18,6 +18,11 @@
     "./package.json": "./package.json"
   },
   "sideEffects": false,
+  "codegenConfig": {
+    "name": "Unimp",
+    "type": "modules",
+    "jsSrcsDir": "src"
+  },
   "files": [
     "src",
     "lib",
@@ -66,13 +71,13 @@
     "unimp",
     "uniapp"
   ],
-  "repository": "https://github.com/Hiroenzo/react-native-unimp",
-  "author": "Kyrie Chung <kyriechung@outlook.com> (https://github.com/Hiroenzo)",
+  "repository": "https://github.com/isB1ar/react-native-unimp",
+  "author": "Kyrie Chung <kyriechung@outlook.com> (https://github.com/isB1ar)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Hiroenzo/react-native-unimp/issues"
+    "url": "https://github.com/isB1ar/react-native-unimp/issues"
   },
-  "homepage": "https://github.com/Hiroenzo/react-native-unimp#readme",
+  "homepage": "https://github.com/isB1ar/react-native-unimp#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
